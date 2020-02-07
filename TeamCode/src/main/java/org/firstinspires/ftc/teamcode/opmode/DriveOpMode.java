@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -145,6 +146,69 @@ public abstract class DriveOpMode extends OpMode {
         } else {
             map.getRightBat().setPosition(1);
         }
+
+        if (gamepad2.left_trigger > 0) {
+            map.getLeftBat().setPosition(1);
+            map.getRightBat().setPosition(0);
+        } else {
+            map.getLeftBat().setPosition(0);
+            map.getRightBat().setPosition(1);
+
+        }
+
+        if (gamepad2.right_bumper) {
+            map.getClaw().setPosition(1);
+        } else if (gamepad2.left_bumper) {
+            map.getClaw().setPosition(0);
+        }
+
+        if (gamepad2.a) {
+            map.getArm1().setPosition(1);
+            map.getArm2().setPosition(1);
+        } else if (gamepad2.y) {
+            map.getArm1().setPosition(0);
+            map.getArm2().setPosition(0);
+        }
+
+
+        //lift control
+
+        boolean liftOverride = false;
+        if (gamepad2.back) {
+            liftOverride = true;
+        } else if (gamepad2.start) {
+            liftOverride = false;
+        }
+
+
+        double liftPos = map.getLift().getCurrentPosition();
+
+        if (gamepad2.dpad_up && liftPos < 7050 && liftOverride == false) {
+            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            map.getLift().setPower(1);
+        } else if (gamepad2.dpad_down && liftPos > 100 && liftOverride == false) {
+            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            map.getLift().setPower(-1);
+        } else if (gamepad2.dpad_up && liftOverride == true) {
+            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            map.getLift().setPower(1);
+        } else if (gamepad2.dpad_down && liftOverride == true) {
+            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            map.getLift().setPower(-1);
+        }else if (gamepad2.b){
+            map.getLift().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            map.getLift().setTargetPosition(50);
+            map.getLift().setPower(-1);
+        }else if (map.getLift().isBusy() != true){
+            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            map.getLift().setPower(0);
+        }
+
+        telemetry.addData("lift: ", map.getLift().getCurrentPosition());
+        telemetry.addData("Overrride: ", liftOverride);
+        telemetry.addData("Motor Status: ", map.getLift().getMode());
+        telemetry.addData("trigger: ", gamepad2.left_trigger);
+
         telemetry.update();
     }
 

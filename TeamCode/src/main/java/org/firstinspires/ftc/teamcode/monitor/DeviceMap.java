@@ -39,12 +39,12 @@ public final class DeviceMap {
     private ExpansionHubEx expansionHub;
 
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
-            leftIntake, rightIntake, conveyer;
+            leftIntake, rightIntake, conveyer, lift;
     private DcMotor[] driveMotors;
     private DcMotor[] intakeMotors;
     private DcMotor[] allMotors;
 
-    private Servo leftAuto, rightAuto, leftBat, rightBat;
+    private Servo leftAuto, rightAuto, leftBat, rightBat, arm1, arm2, claw;
     private Servo[] servos;
 
     private BNO055IMU imu = null;
@@ -101,13 +101,14 @@ public final class DeviceMap {
             rightIntake = map.get(DcMotor.class, "rightIntake");
 
             conveyer = map.get(DcMotor.class, "conveyor");
+            lift = map.get(DcMotor.class, "lift");
 
             this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
             this.intakeMotors = new DcMotor[] {
                      leftIntake, rightIntake, conveyer
             };
             this.allMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom,
-                    leftIntake, rightIntake, conveyer
+                    leftIntake, rightIntake, conveyer, lift
             };
             for(DcMotor motor : this.driveMotors) motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             for(DcMotor motor : this.allMotors) {
@@ -116,6 +117,9 @@ public final class DeviceMap {
                 motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
+
+            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lift.setDirection(DcMotorSimple.Direction.REVERSE);
             rightIntake.setDirection(DcMotorSimple.Direction.REVERSE);
 
             rightTop.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -136,8 +140,12 @@ public final class DeviceMap {
         leftBat = map.get(Servo.class, "LeftBat");
         rightBat = map.get(Servo.class, "RightBat");
 
+        arm1 = map.get(Servo.class, "Arm1");
+        arm2 = map.get(Servo.class, "Arm2");
+        claw = map.get(Servo.class, "Claw");
+
         this.servos =  new Servo[]{
-                leftAuto, rightAuto, leftBat, rightBat
+                leftAuto, rightAuto, leftBat, rightBat, claw, arm1, arm2
         };
     }
 
@@ -318,6 +326,22 @@ public final class DeviceMap {
 
     public DcMotor[] getIntakeMotors() {
         return intakeMotors;
+    }
+
+    public DcMotor getLift() {
+        return lift;
+    }
+
+    public Servo getArm1() {
+        return arm1;
+    }
+
+    public Servo getArm2() {
+        return arm2;
+    }
+
+    public Servo getClaw() {
+        return claw;
     }
 
     public DcMotor[] getAllMotors() {
