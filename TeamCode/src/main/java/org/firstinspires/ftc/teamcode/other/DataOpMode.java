@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.DeviceMap;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 
 import java.util.Locale;

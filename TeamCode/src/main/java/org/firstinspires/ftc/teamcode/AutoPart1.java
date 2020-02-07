@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
-import org.firstinspires.ftc.teamcode.drive.Direction;
-import org.firstinspires.ftc.teamcode.monitor.MonitorManager;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.skystone.SkystonePipeline;
 import org.firstinspires.ftc.teamcode.skystone.Status;

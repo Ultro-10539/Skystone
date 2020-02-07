@@ -1,17 +1,11 @@
 package org.firstinspires.ftc.teamcode.other;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.DeviceMap;
-import org.firstinspires.ftc.teamcode.Ultro;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
+import org.firstinspires.ftc.teamcode.threading.Threader;
+import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.Locale;
 
@@ -35,7 +29,7 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void beforeLoop() {
-        telemetry.addLine(String.format(Locale.ENGLISH, "Angle: %f", Ultro.imuNotif.getAngle()));
+        telemetry.addLine(String.format(Locale.ENGLISH, "Angle: %f", Threader.get(UltroImu.class).getAngle()));
         telemetry.update();
     }
 

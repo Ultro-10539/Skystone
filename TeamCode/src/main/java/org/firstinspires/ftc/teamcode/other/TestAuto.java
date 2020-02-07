@@ -8,10 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.DeviceMap;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.drive.Direction;
-import org.firstinspires.ftc.teamcode.monitor.MonitorIMU;
-import org.firstinspires.ftc.teamcode.monitor.MonitorManager;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 
 import java.util.Locale;

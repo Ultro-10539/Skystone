@@ -33,9 +33,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.DeviceMap;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriver;
-import org.firstinspires.ftc.teamcode.monitor.MonitorManager;
 
 
 /**
@@ -154,7 +153,7 @@ public abstract class DriveOpMode extends OpMode {
      */
     @Override
     public void stop() {
-        MonitorManager.stopAll();
+
     }
 
     protected void addData(String header, Object value) {

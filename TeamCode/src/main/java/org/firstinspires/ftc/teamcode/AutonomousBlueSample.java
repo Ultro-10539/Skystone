@@ -1,18 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.AsyncTask;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.vuforia.State;
-import com.vuforia.TrackableResult;
 
 import org.firstinspires.ftc.teamcode.drive.Direction;
-import org.firstinspires.ftc.teamcode.monitor.MonitorManager;
-import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.skystone.Status;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 
 @Autonomous(name = "AutoBlueSample")
 public class AutonomousBlueSample extends AutoPart1 {

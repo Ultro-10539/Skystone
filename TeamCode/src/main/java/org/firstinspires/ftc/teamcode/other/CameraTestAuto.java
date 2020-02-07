@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.other;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.DeviceMap;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.skystone.SkystonePipeline;
 import org.opencv.core.Mat;

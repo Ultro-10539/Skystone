@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 
 @Autonomous(name = "AutoBlueFoundation")
 public class AutonomousBlueFoundation extends AutoPart1 {

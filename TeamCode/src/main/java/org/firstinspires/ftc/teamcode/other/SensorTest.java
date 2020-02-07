@@ -1,18 +1,12 @@
 package org.firstinspires.ftc.teamcode.other;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.DeviceMap;
-import org.firstinspires.ftc.teamcode.Ultro;
-import org.firstinspires.ftc.teamcode.imu.UltroImu;
-import org.firstinspires.ftc.teamcode.monitor.MonitorIMU;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.threading.Threader;
+import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
 
@@ -42,10 +36,11 @@ public class SensorTest extends AutoOpMode {
                 telemetry.addLine("Motor Position: " + bulkData.getMotorCurrentPosition(motor));
             }
 
+            UltroImu imu = Threader.get(UltroImu.class);
             double[] floats = new double[] {
-                    Ultro.imuNotif.getYaw(),
-                    Ultro.imuNotif.getRoll(),
-                    Ultro.imuNotif.getPitch(),
+                    imu.getYaw(),
+                    imu.getRoll(),
+                    imu.getPitch(),
             };
             telemetry.addLine(String.format(Locale.ENGLISH, "Angles: %f %f %f", floats[0], floats[1], floats[2]));
 

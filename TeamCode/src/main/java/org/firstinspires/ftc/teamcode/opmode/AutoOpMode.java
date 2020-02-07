@@ -29,26 +29,13 @@
 
 package org.firstinspires.ftc.teamcode.opmode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
-import org.firstinspires.ftc.teamcode.DeviceMap;
-import org.firstinspires.ftc.teamcode.Ultro;
-import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.drive.IActive;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriver;
-import org.firstinspires.ftc.teamcode.imu.UltroImu;
-import org.firstinspires.ftc.teamcode.monitor.MonitorIMU;
-import org.firstinspires.ftc.teamcode.monitor.MonitorManager;
-
-import java.util.Locale;
+import org.firstinspires.ftc.teamcode.threading.Threader;
 
 
 /**
@@ -81,7 +68,7 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
         mapper.setCurrentOpMode(this);
         mapper.setTelemetry(telemetry);
         setup(mapper);
-        Ultro.imuNotif.setUp();
+        Threader.registerThreads();
 
         driver = new MecanumDriver();
         driver.setTelemetry(telemetry);
@@ -92,7 +79,6 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
     }
 
     public void afterStop() {
-        MonitorManager.stopAll();
         DeviceMap map = DeviceMap.getInstance();
         map.deactivateTfod();
         map.deactivateOpenCV();
@@ -106,7 +92,6 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
      */
     public void setup(DeviceMap map) {
         map.setupAll(hardwareMap);
-        MonitorManager.startAll(map);
     }
 
     @Override
@@ -119,14 +104,12 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
         waitForStart();
         runtime.reset();
 
-        Ultro.imuNotif.start();
-        Ultro.imuNotif.resetAngle();
         run();
 
 
         // run until the end of the match (driver presses STOP)
         afterStop();
-        Ultro.imuNotif.stop();
+        Threader.destroy();
     }
 
     public abstract void beforeLoop();
