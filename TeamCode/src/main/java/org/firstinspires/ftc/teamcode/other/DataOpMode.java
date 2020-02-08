@@ -19,7 +19,7 @@ public class DataOpMode extends AutoOpMode  {
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.setupSensors(hardwareMap);
-
+        mapper.setUpImu(hardwareMap);
 
     }
 
@@ -34,7 +34,7 @@ public class DataOpMode extends AutoOpMode  {
             telemetry.addData("servo:", servo.getPosition());
         }
         for(ColorSensor colorSensor : map.getColorSensors()) {
-            telemetry.addData("colorsensor (r, g, b): ", String.format(Locale.ENGLISH, "%d, %d, %d", colorSensor.red(), colorSensor.green(), colorSensor.blue()));
+            telemetry.addData("colorsensor dist: (r, g, b): ", String.format(Locale.ENGLISH, "%d, %d, %d", colorSensor.red(), colorSensor.green(), colorSensor.blue()));
         }
         for(DistanceSensor distanceSensor : map.getDistanceSensors()) {
             telemetry.addData("Distance sensor ", distanceSensor.getDistance(DistanceUnit.CM));

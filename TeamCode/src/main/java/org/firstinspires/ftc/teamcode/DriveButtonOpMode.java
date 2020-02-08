@@ -104,8 +104,8 @@ public class DriveButtonOpMode extends DriveOpMode {
         Servo left = mapper.getLeftAuto();
         Servo right = mapper.getRightAuto();
 
-        Servo leftBat = mapper.getLeftBat();
-        Servo rightBat = mapper.getRightBat();
+        Servo leftBat = mapper.getLeftFinger();
+        Servo rightBat = mapper.getRightFinger();
         buttons.addAll(Arrays.asList(
             builder.setGetter(() -> gamepad1.b)
                 .setbFunction(() -> {

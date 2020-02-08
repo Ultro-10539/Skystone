@@ -10,7 +10,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 public class UltroMotor extends UltroThread {
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
-            leftIntake, rightIntake, conveyer;
+            leftIntake, rightIntake, conveyer, lift;
     private ExpansionHubEx hubEx;
     public UltroMotor() {
         super();
@@ -25,28 +25,34 @@ public class UltroMotor extends UltroThread {
         leftIntake = map.getLeftIntake();
         rightIntake = map.getRightIntake();
         conveyer = map.getConveyer();
+        lift = map.getLift();
 
         hubEx = map.getExpansionHub();
     }
 
     @Override
-    public void run() {
+    public void go() {
         experimentalUpdate();
     }
 
     private void experimentalUpdate() {
+        if(hubEx == null) {
+            slowUpdate();
+            return;
+        }
         RevBulkData data = hubEx.getBulkInputData();
-        RobotData.updateValues(
-            data.getMotorCurrentPosition(leftTop),
-            data.getMotorCurrentPosition(leftBottom),
-            data.getMotorCurrentPosition(rightTop),
-            data.getMotorCurrentPosition(rightBottom),
-            data.getMotorCurrentPosition(leftIntake),
-            data.getMotorCurrentPosition(rightIntake),
-            data.getMotorCurrentPosition(conveyer));
+        if(data == null) {
+            slowUpdate();
+            return;
+        }
+
+        RobotData.leftTop = data.getMotorCurrentPosition(leftTop);
+        RobotData.leftBottom = data.getMotorCurrentPosition(leftBottom);
+        RobotData.rightTop = data.getMotorCurrentPosition(rightTop);
+        RobotData.rightBottom = data.getMotorCurrentPosition(rightBottom);
     }
 
-    private void slowUpdate() {
+    private synchronized void slowUpdate() {
         RobotData.updateValues(
             leftTop.getCurrentPosition(),
             leftBottom.getCurrentPosition(),
@@ -54,6 +60,7 @@ public class UltroMotor extends UltroThread {
             rightBottom.getCurrentPosition(),
             leftIntake.getCurrentPosition(),
             rightIntake.getCurrentPosition(),
-            conveyer.getCurrentPosition());
+            conveyer.getCurrentPosition(),
+            lift.getCurrentPosition());
     }
 }

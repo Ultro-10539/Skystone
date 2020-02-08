@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.other;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.threading.Threader;
@@ -22,6 +23,7 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void setup(DeviceMap map) {
+        map.setUpExpansionHub(hardwareMap);
         map.setUpImu(hardwareMap);
         map.setUpMotors(hardwareMap);
         telemetry.addData("Setted up imu!", "ready to go!");
@@ -35,10 +37,7 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.turn(0.4, -90);
-        sleep(3000);
-        driver.turn(0.4, -90);
-        driver.turn(0.4, -90);
+        driver.move(Direction.RIGHT, 0.75F, 40, true);
 
         telemetry.addLine("Passed turning negative thrice");
 

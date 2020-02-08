@@ -54,7 +54,7 @@ public class UltroImu extends UltroThread {
     }
 
     @Override
-    public void run() {
+    public void go() {
         updateAngles2();
     }
 

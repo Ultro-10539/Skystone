@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.monitor;
 
 import android.content.Context;
 
+import com.qualcomm.hardware.ams.AMSColorSensorImpl;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -44,7 +45,7 @@ public final class DeviceMap {
     private DcMotor[] intakeMotors;
     private DcMotor[] allMotors;
 
-    private Servo leftAuto, rightAuto, leftBat, rightBat, arm1, arm2, claw;
+    private Servo leftAuto, rightAuto, leftFinger, rightFinger, foundation, arm1, arm2, claw;
     private Servo[] servos;
 
     private BNO055IMU imu = null;
@@ -58,7 +59,7 @@ public final class DeviceMap {
     private ColorSensor sensorColorLeft, sensorColorRight;
     private ColorSensor[] colorSensors;
 
-    private DistanceSensor sensorDistanceLeft, sensorDistanceRight;
+    private DistanceSensor distanceRight, distanceBack, distanceLeft, sensorColorLeftDist, sensorColorRightDist;
     private DistanceSensor[] distanceSensors;
 
     public DeviceMap(final HardwareMap map) {
@@ -81,7 +82,7 @@ public final class DeviceMap {
     }
 
     public void setUpExpansionHub(HardwareMap map) {
-        this.expansionHub = map.get(ExpansionHubEx.class, "Expansion Hub 2");
+        this.expansionHub = map.get(ExpansionHubEx.class, "Expansion Hub 3");
     }
     /**
      * This will just set up all the driveMotors
@@ -137,15 +138,16 @@ public final class DeviceMap {
 
         leftAuto = map.get(Servo.class, "LeftAuto");
         rightAuto = map.get(Servo.class, "RightAuto");
-        leftBat = map.get(Servo.class, "LeftBat");
-        rightBat = map.get(Servo.class, "RightBat");
+        leftFinger = map.get(Servo.class, "LeftFinger");
+        rightFinger = map.get(Servo.class, "RightFinger");
+        foundation = map.get(Servo.class, "foundation");
 
         arm1 = map.get(Servo.class, "Arm1");
         arm2 = map.get(Servo.class, "Arm2");
         claw = map.get(Servo.class, "Claw");
 
         this.servos =  new Servo[]{
-                leftAuto, rightAuto, leftBat, rightBat, claw, arm1, arm2
+                leftAuto, rightAuto, leftFinger, rightFinger, claw, arm1, arm2
         };
     }
 
@@ -155,15 +157,19 @@ public final class DeviceMap {
 
         sensorColorLeft = map.get(ColorSensor.class, "ColorLeft");
         sensorColorRight = map.get(ColorSensor.class, "ColorRight");
-        sensorDistanceLeft = map.get(DistanceSensor.class, "DistanceLeft");
-        sensorDistanceRight = map.get(DistanceSensor.class, "DistanceRight");
+        sensorColorLeftDist = map.get(DistanceSensor.class, "ColorLeft");
+        sensorColorRightDist = map.get(DistanceSensor.class, "ColorRight");
+
+        distanceLeft = map.get(DistanceSensor.class, "DistanceLeft");
+        distanceRight = map.get(DistanceSensor.class, "DistanceRight");
+        distanceBack = map.get(DistanceSensor.class, "DistanceBack");
 
         this.colorSensors = new ColorSensor[] {
                 sensorColorLeft, sensorColorRight
         };
 
         this.distanceSensors = new DistanceSensor[] {
-                sensorDistanceLeft, sensorDistanceRight
+                distanceRight, distanceBack, distanceLeft, sensorColorLeftDist, sensorColorRightDist
         };
 
     }
@@ -291,11 +297,11 @@ public final class DeviceMap {
     public Servo getRightAuto(){
         return rightAuto;
     }
-    public Servo getLeftBat(){
-        return leftBat;
+    public Servo getLeftFinger(){
+        return leftFinger;
     }
-    public Servo getRightBat(){
-        return rightBat;
+    public Servo getRightFinger(){
+        return rightFinger;
     }
 
     public Servo[] getServos() {
@@ -313,11 +319,24 @@ public final class DeviceMap {
         return colorSensors;
     }
 
-    public DistanceSensor getSensorDistanceLeft(){
-        return sensorDistanceLeft;
+    public DistanceSensor getDistanceRight() {
+        return distanceRight;
     }
-    public DistanceSensor getSensorDistanceRight(){
-        return sensorDistanceRight;
+
+    public DistanceSensor getDistanceBack() {
+        return distanceBack;
+    }
+
+    public DistanceSensor getDistanceLeft() {
+        return distanceLeft;
+    }
+
+    public DistanceSensor getSensorColorLeftDist() {
+        return sensorColorLeftDist;
+    }
+
+    public DistanceSensor getSensorColorRightDist() {
+        return sensorColorRightDist;
     }
 
     public DistanceSensor[] getDistanceSensors() {
@@ -342,6 +361,10 @@ public final class DeviceMap {
 
     public Servo getClaw() {
         return claw;
+    }
+
+    public Servo getFoundation(){
+        return foundation;
     }
 
     public DcMotor[] getAllMotors() {

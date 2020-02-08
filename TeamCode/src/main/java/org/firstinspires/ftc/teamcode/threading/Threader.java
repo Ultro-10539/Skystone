@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.threading;
 
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
+import org.firstinspires.ftc.teamcode.threading.control.UltroMotor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public final class Threader {
         service = Executors.newScheduledThreadPool(5, Executors.defaultThreadFactory());
 
         registerRunnable(UltroImu.class);
+        registerRunnable(UltroMotor.class);
     }
 
     public static void destroy() {
@@ -27,6 +30,7 @@ public final class Threader {
     private static void registerRunnable(Class<? extends UltroThread> clasz) {
         try {
             UltroThread thread = clasz.newInstance();
+            DeviceMap.getInstance().getTelemetry().addData("Added thread: ", clasz.getName());
             threads.add(thread);
             service.scheduleAtFixedRate(thread, 0, thread.getTime(), thread.getTimeUnit());
         }catch (IllegalAccessException|InstantiationException e) {

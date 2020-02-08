@@ -76,7 +76,7 @@ public final class MecanumDriver implements IDriver {
             inches *= (1D / 0.7D);
         }else if(direction == Direction.FORWARD || direction == Direction.BACKWARD) {
          */
-        inches -= 3.5D;
+        if(direction == Direction.BACKWARD || direction == Direction.FORWARD) inches -= 3.5D;
         //}
 
         double calc = COUNTS_PER_INCH * inches;
@@ -109,6 +109,11 @@ public final class MecanumDriver implements IDriver {
         move(direction, power);
 
         while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
+            current = getMotorCounts();
+            addData("leftTop origin: " + current[0] + " leftTopTarget: ", leftTopTarget);
+            addData("rightTop origin: " + current[1] + " rightTopTarget: ", rightTopTarget);
+            addData("leftBottom origin: " + current[2] + "leftBottomTarget: ", leftBottomTarget);
+            addData("rightBottom origin: " + current[3] + "rightBottomTarget: ", rightBottomTarget);
             if (gyroAssist){
                 double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
                 addData("initial angle", initialAngle);
@@ -139,6 +144,92 @@ public final class MecanumDriver implements IDriver {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+    }
+
+    /**
+     * encoder drive
+     * @param direction
+     * @param inches
+     */
+    public void move(Direction direction, double inches, boolean gyroAssist) {
+        /*
+        if((direction == Direction.LEFT) || (direction == Direction.RIGHT)){
+            inches *= (1D / 0.7D);
+        }else if(direction == Direction.FORWARD || direction == Direction.BACKWARD) {
+         */
+        inches -= 3.5D;
+        //}
+
+        double calc = COUNTS_PER_INCH * inches;
+
+
+        for(DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        int[] current = getMotorCounts();
+        //other calculations needed
+        int leftTopTarget = FastMath.abs(current[0] + (int) (calc * direction.getLeftTop()));
+        int rightTopTarget = FastMath.abs(current[1] + (int) (calc * direction.getRightTop()));
+        int leftBottomTarget = FastMath.abs(current[2] + (int) (calc * direction.getLeftBottom()));
+        int rightBottomTarget = FastMath.abs(current[3] + (int) (calc * direction.getRightBottom()));
+
+        double angle = 0, initialAngle = 0;
+        if(gyroAssist) {
+            UltroImu imu = Threader.get(UltroImu.class);
+            imu.resetAngle();
+            angle = imu.getAngle();
+            initialAngle = angle;
+        }
+        LinearOpMode linear = null;
+        if(map.getCurrentOpMode() instanceof AutoOpMode) {
+            linear = (LinearOpMode) map.getCurrentOpMode();
+            if(linear == null) return;
+        }
+        double power;
+        while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
+            int[] counts = getMotorCounts();
+            double leftTopPower = findPower(counts[0], leftTopTarget);
+            double rightTopPower = findPower(counts[1], rightTopTarget);
+            double leftBottomPower = findPower(counts[2], leftBottomTarget);
+            double rightBottomPower = findPower(counts[3], rightBottomTarget);
+            power = (leftTopPower + rightTopPower + leftBottomPower + rightBottomPower) / 4D;
+            if (!gyroAssist) continue;
+            double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
+            addData("initial angle", initialAngle);
+            addData("angle", angle);
+            addData("power", power);
+            if (angle > initialAngle + 2) {
+                addData("Increasing right side", correctedPower);
+                gyroAssist(direction.getRightSide(), power + 0.1);
+                gyroAssist(direction.getLeftSide(), correctedPower);
+            } else if(angle < initialAngle - 2) {
+                addData("Increasing left side", correctedPower);
+                gyroAssist(direction.getLeftSide(), power + 0.1);
+                gyroAssist(direction.getRightSide(), correctedPower);
+            }else {
+                addData("normal", "side");
+                move(direction, power);
+            }
+            updateTelemetry();
+
+            UltroImu imu = Threader.get(UltroImu.class);
+            angle = imu.getAngle();
+        }
+
+        stop();
+
+        for(DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    private double findPower(double current, double finalCount) {
+        final double MAX_POWER = .95D;
+
+        return MAX_POWER - (current/finalCount);
     }
 
     private void gyroAssist(int[] side, double power) {

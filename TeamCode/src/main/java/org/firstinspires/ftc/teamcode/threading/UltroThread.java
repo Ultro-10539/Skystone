@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.threading;
 
+import com.qualcomm.robotcore.util.RobotLog;
+
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 
 import java.util.concurrent.TimeUnit;
@@ -14,12 +16,23 @@ public abstract class UltroThread implements Runnable {
         setUp(deviceMap);
     }
 
+    @Override
+    public void run() {
+        try {
+            go();
+        }catch (Exception e) {
+            e.printStackTrace();
+            RobotLog.dd("ULTRO", e.getLocalizedMessage());
+        }
+    }
+
+    public abstract void go();
     public abstract void setUp(DeviceMap map);
 
     public TimeUnit getTimeUnit() {
         return TimeUnit.MILLISECONDS;
     }
     public long getTime() {
-        return 50L;
+        return 10L;
     }
 }

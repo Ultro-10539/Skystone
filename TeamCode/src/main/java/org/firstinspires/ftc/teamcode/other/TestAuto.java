@@ -49,6 +49,6 @@ public class TestAuto extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Direction.FORWARD, 0.25, 50);
+        driver.move(Direction.FORWARD, 20, true);
     }
 }

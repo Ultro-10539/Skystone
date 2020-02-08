@@ -11,7 +11,7 @@ public enum Direction {
     //LeftBottom(2), RightBottom (3)
     FORWARD(new int[]{0, 2}, new int[]{1, 3},1, 1, 1, 1),
     LEFT(new int[] {1, 2}, new int[] {0, 3},-1, 1, 1, -1),
-    RIGHT(new int[] {3, 4}, new int[] {1, 2}, 1, -1, -1, 1),
+    RIGHT(new int[] {1, 2}, new int[] {0, 3}, 1, -1, -1, 1),
     BACKWARD(new int[]{1, 3}, new int[]{0, 2}, -1, -1, -1, -1),
 
     UPPERLEFT(0, 1, 1, 0),
@@ -19,8 +19,8 @@ public enum Direction {
     BOTTOMLEFT(-1, 0, 0, -1),
     BOTTOMRIGHT(0, -1, -1, 0),
 
-    COUNTERCLOCKWISE(-1, 1, -1, 1),
-    CLOCKWISE(1,-1, 1, -1);
+    CLOCKWISE(-1, 1, -1, 1),
+    COUNTERCLOCKWISE(1,-1, 1, -1);
 
     private int[] movement;
     private int[] left;

@@ -134,25 +134,20 @@ public abstract class DriveOpMode extends OpMode {
         }
         telemetry.addData("rightPos: ", right.getPosition());
 
-
-        if(gamepad2.left_bumper){
-            map.getLeftBat().setPosition(1);
-        } else {
-            map.getLeftBat().setPosition(0);
+        if(gamepad1.left_bumper){
+            map.getLeftFinger().setPosition(1);
+            map.getRightFinger().setPosition(1);
+        }
+        if(gamepad1.right_bumper){
+            map.getLeftFinger().setPosition(0);
+            map.getRightFinger().setPosition(0);
         }
 
-        if(gamepad2.right_bumper){
-            map.getRightBat().setPosition(0);
-        } else {
-            map.getRightBat().setPosition(1);
-        }
 
         if (gamepad2.left_trigger > 0) {
-            map.getLeftBat().setPosition(1);
-            map.getRightBat().setPosition(0);
+            map.getFoundation().setPosition(1);
         } else {
-            map.getLeftBat().setPosition(0);
-            map.getRightBat().setPosition(1);
+            map.getFoundation().setPosition(0);
 
         }
 
