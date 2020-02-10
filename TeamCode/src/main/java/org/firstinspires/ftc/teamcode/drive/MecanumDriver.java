@@ -47,6 +47,83 @@ public final class MecanumDriver implements IDriver {
     }
 
     /**
+     * Drive until a conditional is true
+     * @param direction
+     * @param power
+     * @param conditional
+     * @param gyroAssist
+     */
+    public void moveCond(Direction direction, double power, boolean conditional, boolean gyroAssist){
+        for(DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        double angle = 0, initialAngle = 0;
+        if(gyroAssist) {
+            UltroImu imu = Threader.get(UltroImu.class);
+            imu.resetAngle();
+            angle = imu.getAngle();
+            initialAngle = angle;
+        }
+        LinearOpMode linear = null;
+        if(map.getCurrentOpMode() instanceof AutoOpMode) {
+            linear = (LinearOpMode) map.getCurrentOpMode();
+            if(linear == null) return;
+        }
+
+        if(direction == Direction.LEFT){
+            map.getLeftTop().setPower(-power);
+            map.getRightTop().setPower(power);
+            map.getLeftBottom().setPower(power);
+            map.getRightBottom().setPower(-power);
+        } else if(direction == Direction.RIGHT){
+            map.getLeftTop().setPower(power);
+            map.getRightTop().setPower(-power);
+            map.getLeftBottom().setPower(-power);
+            map.getRightBottom().setPower(power);
+        } else {
+            move(direction, power);
+        }
+        //statement is an if because it is already placed inside of a while loop
+//        if(!conditional) {
+//            addData("moving to position", conditional);
+//            updateTelemetry();
+//            if ((gyroAssist && (direction == Direction.FORWARD)) || (gyroAssist && (direction == Direction.BACKWARD))){
+//                double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
+//                addData("initial angle", initialAngle);
+//                addData("angle", angle);
+//                addData("power", power);
+//                if (angle > initialAngle + 2) {
+//                    addData("Increasing right side", correctedPower);
+//                    gyroAssist(direction.getRightSide(), power + 0.1);
+//                    gyroAssist(direction.getLeftSide(), correctedPower);
+//                } else if(angle < initialAngle - 2) {
+//                    addData("Increasing left side", correctedPower);
+//                    gyroAssist(direction.getLeftSide(), power + 0.1);
+//                    gyroAssist(direction.getRightSide(), correctedPower);
+//                }else {
+//                    addData("normal", "side");
+//                    move(direction, power);
+//                }
+//                updateTelemetry();
+//
+//                UltroImu imu = Threader.get(UltroImu.class);
+//                angle = imu.getAngle();
+//            }
+//        }
+    }
+
+    public void stopAndReset(){
+        stop();
+        addData("finished moving", 0.0);
+        updateTelemetry();
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    /**
      * Move an unspecified amount of distance
      * @param direction
      * @param power
@@ -288,6 +365,62 @@ public final class MecanumDriver implements IDriver {
         double RF = Range.clip(left_stick_y - left_stick_x - right_stick_x, -1, 1);
         double LB = Range.clip(left_stick_y - left_stick_x + right_stick_x, -1, 1);
         double RB = Range.clip(left_stick_y + left_stick_x - right_stick_x, -1, 1);
+
+        map.getLeftTop().setPower(LF);
+        map.getRightTop().setPower(RF);
+        map.getLeftBottom().setPower(LB);
+        map.getRightBottom().setPower(RB);
+    }
+
+    /**
+     * Updated mecanum drive function this year (math is ? ?? ? )
+     * @param left_stick_x gamepadleftX
+     * @param left_stick_y gamepadleftY
+     * @param right_stick_x gamepadrightX
+     */
+    public void moveTrigRed(double left_stick_x, double left_stick_y, double right_stick_x){
+        // how much to amplify the power
+        double r = Math.hypot(left_stick_y, left_stick_x);
+
+        //calculates the angle of the joystick - 45 degrees
+        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - Math.PI / 4;
+
+        // rotation
+        double rightX = right_stick_x;
+
+        // equation for each of the wheels
+        final double LF = r * Math.cos(robotAngle) + rightX;
+        final double RF = r * Math.sin(robotAngle) - rightX;
+        final double LB = r * Math.sin(robotAngle) + rightX;
+        final double RB = r * Math.cos(robotAngle) - rightX;
+
+        map.getLeftTop().setPower(LF);
+        map.getRightTop().setPower(RF);
+        map.getLeftBottom().setPower(LB);
+        map.getRightBottom().setPower(RB);
+    }
+
+    /**
+     * Updated mecanum drive function this year (math is ? ?? ? )
+     * @param left_stick_x gamepadleftX
+     * @param left_stick_y gamepadleftY
+     * @param right_stick_x gamepadrightX
+     */
+    public void moveTrigBlue(double left_stick_x, double left_stick_y, double right_stick_x){
+        // how much to amplify the power
+        double r = Math.hypot(left_stick_y, left_stick_x);
+
+        //calculates the angle of the joystick - 45 degrees
+        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - ((3*Math.PI) / 4);
+
+        // rotation
+        double rightX = right_stick_x;
+
+        // equation for each of the wheels
+        final double LF = r * Math.cos(robotAngle) + rightX;
+        final double RF = r * Math.sin(robotAngle) - rightX;
+        final double LB = r * Math.sin(robotAngle) + rightX;
+        final double RB = r * Math.cos(robotAngle) - rightX;
 
         map.getLeftTop().setPower(LF);
         map.getRightTop().setPower(RF);

@@ -67,7 +67,8 @@ public abstract class DriveOpMode extends OpMode {
 
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
-
+        mapper.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        mapper.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration

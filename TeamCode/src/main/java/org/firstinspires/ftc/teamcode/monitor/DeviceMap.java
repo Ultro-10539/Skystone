@@ -118,10 +118,8 @@ public final class DeviceMap {
                 motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
-
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotorSimple.Direction.REVERSE);
-            rightIntake.setDirection(DcMotorSimple.Direction.REVERSE);
 
             rightTop.setDirection(DcMotorSimple.Direction.REVERSE);
             rightBottom.setDirection(DcMotorSimple.Direction.REVERSE);
