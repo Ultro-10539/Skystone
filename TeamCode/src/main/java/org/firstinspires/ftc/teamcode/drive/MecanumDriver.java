@@ -411,7 +411,7 @@ public final class MecanumDriver implements IDriver {
         double r = Math.hypot(left_stick_y, left_stick_x);
 
         //calculates the angle of the joystick - 45 degrees
-        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - ((3*Math.PI) / 4);
+        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - ((5*Math.PI) / 4);
 
         // rotation
         double rightX = right_stick_x;
@@ -428,6 +428,11 @@ public final class MecanumDriver implements IDriver {
         map.getRightBottom().setPower(RB);
     }
 
+    /**
+     *
+     * @param power
+     * @param angle; -90 is clockwise, 90 is counterclockwise
+     */
     @Override
     public void turn(double power, double angle) {
         if(FastMath.abs(angle) > 180) {

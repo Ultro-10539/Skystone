@@ -19,8 +19,8 @@ public enum Direction {
     BOTTOMLEFT(-1, 0, 0, -1),
     BOTTOMRIGHT(0, -1, -1, 0),
 
-    CLOCKWISE(-1, 1, -1, 1),
-    COUNTERCLOCKWISE(1,-1, 1, -1);
+    COUNTERCLOCKWISE(-1, 1, -1, 1),
+    CLOCKWISE(1,-1, 1, -1);
 
     private int[] movement;
     private int[] left;

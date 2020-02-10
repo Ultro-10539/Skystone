@@ -44,9 +44,15 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
 
         //Line up with correct block
         if (pos == Status.LEFT_CORNER){
-            driver.move(Direction.RIGHT, 0.7, 13);
+            while(map.getDistanceRight().getDistance(DistanceUnit.CM) < 40){
+                driver.move(Direction.RIGHT, 0.7);
+            }
+            driver.move(Direction.RIGHT, 0);
         } else if(pos == Status.MIDDLE){
-            driver.move(Direction.RIGHT, 0.7, 6);
+            while(map.getDistanceRight().getDistance(DistanceUnit.CM) < 15){
+                driver.move(Direction.RIGHT, 0.7);
+            }
+            driver.move(Direction.RIGHT, 0);
         }
 
         //Drive up to blocks
@@ -62,9 +68,8 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         map.getRightAuto().setPosition(0.6);
 
         //move forward and strafe to foundation then move back again
-        while(map.getDistanceBack().getDistance(DistanceUnit.CM) >= 120){
-            driver.move(Direction.FORWARD, 0.2);
-        }
+        driver.move(Direction.FORWARD, 0.3);
+        sleep(400);
         driver.move(Direction.FORWARD, 0);
         if (pos == Status.LEFT_CORNER){
             driver.move(Direction.RIGHT, 0.7, 108);
@@ -73,8 +78,9 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         } else {
             driver.move(Direction.RIGHT, 0.7, 120);
         }
-        driver.move(Direction.BACKWARD, 0.27);
-        sleep(1000);
+        while(!(map.getSensorColorLeftDist().getDistance(DistanceUnit.CM) <= 20) || (map.getSensorColorRightDist().getDistance(DistanceUnit.CM) <= 20)){
+            driver.move(Direction.BACKWARD, 0.3);
+        }
         driver.move(Direction.BACKWARD, 0);
 
         //drop stone and grab foundation
@@ -82,16 +88,14 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         sleep(1000);
         map.getRightFinger().setPosition(0.0);
         sleep(1000);
-        driver.move(Direction.RIGHT, 0.7, 1);
         map.getFoundation().setPosition(1.0);
         sleep(1000);
 
         //drive to wall then turn
-        while(map.getDistanceBack().getDistance(DistanceUnit.CM) > 5){
-            driver.move(Direction.FORWARD, 0.3);
-        }
+        driver.move(Direction.FORWARD, 0.3);
+        sleep(1000);
         driver.move(Direction.FORWARD, 0);
-
+        driver.turn(0.7, 90);
 
 
     }
