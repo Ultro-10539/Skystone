@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.monitor;
 
 import android.content.Context;
 
-import com.qualcomm.hardware.ams.AMSColorSensorImpl;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcontroller.ultro.listener.UltroVuforia;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.revextensions2.ExpansionHubEx;
+import org.openftc.revextensions2.ExpansionHubMotor;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -37,7 +38,7 @@ public final class DeviceMap {
     private Telemetry telemetry;
     private OpMode currentOpMode;
 
-    private ExpansionHubEx expansionHub;
+    private ExpansionHubEx expansionHub3, expansionHub2;
 
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
             leftIntake, rightIntake, conveyer, lift;
@@ -47,6 +48,8 @@ public final class DeviceMap {
 
     private Servo leftAuto, rightAuto, leftFinger, rightFinger, foundation, arm1, arm2, claw;
     private Servo[] servos;
+
+    private RevBlinkinLedDriver ledDriver;
 
     private BNO055IMU imu = null;
     private Orientation lastAngles;
@@ -79,10 +82,14 @@ public final class DeviceMap {
         initTfod(map); //init tensorflow
         setupServos(map); //init servos
         setupSensors(map); //init d-sensors, color-sensors
+        setUpLEDs(map);
     }
 
     public void setUpExpansionHub(HardwareMap map) {
-        this.expansionHub = map.get(ExpansionHubEx.class, "Expansion Hub 3");
+        this.expansionHub3 = map.get(ExpansionHubEx.class, "Expansion Hub 3");
+        this.expansionHub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
+
+        this.expansionHub2.setAllI2cBusSpeeds(ExpansionHubEx.I2cBusSpeed.HIGH_3_4M);
     }
     /**
      * This will just set up all the driveMotors
@@ -92,17 +99,17 @@ public final class DeviceMap {
         //return CompletableFuture.runAsync(() -> {
             telemetry.addLine("Setting up driveMotors");
             telemetry.update();
-            leftTop = map.get(DcMotor.class, "LeftTop");
-            leftBottom = map.get(DcMotor.class, "LeftBottom");
-            rightTop = map.get(DcMotor.class, "RightTop");
-            rightBottom = map.get(DcMotor.class, "RightBottom");
+            leftTop = map.get(ExpansionHubMotor.class, "LeftTop");
+            leftBottom = map.get(ExpansionHubMotor.class, "LeftBottom");
+            rightTop = map.get(ExpansionHubMotor.class, "RightTop");
+            rightBottom = map.get(ExpansionHubMotor.class, "RightBottom");
 
 
-            leftIntake = map.get(DcMotor.class, "leftIntake");
-            rightIntake = map.get(DcMotor.class, "rightIntake");
+            leftIntake = map.get(ExpansionHubMotor.class, "leftIntake");
+            rightIntake = map.get(ExpansionHubMotor.class, "rightIntake");
 
-            conveyer = map.get(DcMotor.class, "conveyor");
-            lift = map.get(DcMotor.class, "lift");
+            conveyer = map.get(ExpansionHubMotor.class, "conveyor");
+            lift = map.get(ExpansionHubMotor.class, "lift");
 
             this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
             this.intakeMotors = new DcMotor[] {
@@ -172,7 +179,7 @@ public final class DeviceMap {
 
     }
     public /*CompletableFuture<Void>*/void setUpImu(HardwareMap map) {
-        //expansionHub.setAllI2cBusSpeeds(ExpansionHubEx.I2cBusSpeed.STANDARD_100K);
+        //expansionHub3.setAllI2cBusSpeeds(ExpansionHubEx.I2cBusSpeed.STANDARD_100K);
         //return CompletableFuture.runAsync(() -> {
 
             telemetry.addLine("Setting up imu");
@@ -206,6 +213,11 @@ public final class DeviceMap {
         //}, service);
     }
 
+    public void setUpLEDs(HardwareMap map) {
+        ledDriver = map.get(RevBlinkinLedDriver.class, "blinkin");
+        ledDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
+
+    }
     public void setupOpenCV(HardwareMap map) {
         Context appContext = map.appContext;
         int cameraMonitorViewId = appContext.getResources().getIdentifier("cameraMonitorViewId", "id", appContext.getPackageName());
@@ -256,9 +268,14 @@ public final class DeviceMap {
         if(tfod != null)
             tfod.deactivate();
     }
-
-    public ExpansionHubEx getExpansionHub() {
-        return expansionHub;
+    public void deactivateLedDriver() {
+        ledDriver.close();
+    }
+    public ExpansionHubEx getExpansionHub3() {
+        return expansionHub3;
+    }
+    public ExpansionHubEx getExpansionHub2() {
+        return expansionHub2;
     }
 
     //The methods below get all the driveMotors
@@ -407,5 +424,9 @@ public final class DeviceMap {
 
     public OpenCvCamera getCamera() {
         return camera;
+    }
+
+    public RevBlinkinLedDriver getLedDriver() {
+        return ledDriver;
     }
 }

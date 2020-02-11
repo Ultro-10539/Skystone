@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -79,6 +80,7 @@ public class DriveButtonOpMode extends DriveOpMode {
 
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
+        mapper.setUpLEDs(hardwareMap);
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -154,13 +156,25 @@ public class DriveButtonOpMode extends DriveOpMode {
                 }).build(),
             builder.setGetter(() -> gamepad1.left_bumper)
                     .setbFunction(() -> {
-                        if (color == "red"){
+                        if (color.equalsIgnoreCase("red")) {
                             color = "blue";
+                            mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
                         } else {
                             color = "red";
+                            mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
                         }
-                    }).build()
-                ));
+                    }).build(),
+            builder.setGetter(() -> gamepad2.a)
+                    .setbFunction(() -> {
+                        mapper.getArm1().setPosition(1);
+                        mapper.getArm2().setPosition(1);
+                    }).build(),
+            builder.setGetter(() -> gamepad2.y)
+                    .setbFunction(() -> {
+                        mapper.getArm1().setPosition(0);
+                        mapper.getArm2().setPosition(0);
+                }).build()
+            ));
         return buttons;
     }
     /*
@@ -189,11 +203,9 @@ public class DriveButtonOpMode extends DriveOpMode {
         double y = -gamepad1.left_stick_y;
         double right_stick_x = -gamepad1.right_stick_x;
         double multiplier = gamepad1.left_trigger + 1;
-        if(color == "red") {
+        if(color.equalsIgnoreCase("red"))
             driver.moveTrigRed(x / multiplier, y / multiplier, right_stick_x / multiplier);
-        } else {
-            driver.moveTrigBlue(x / multiplier, y / multiplier, right_stick_x / multiplier);
-        }
+        else driver.moveTrigBlue(x / multiplier, y / multiplier, right_stick_x / multiplier);
         driver.intake(gamepad2.left_stick_y, gamepad2.right_stick_y);
         driver.conveyer(-gamepad2.right_trigger);
 
@@ -203,14 +215,6 @@ public class DriveButtonOpMode extends DriveOpMode {
         } else {
             map.getFoundation().setPosition(0);
 
-        }
-
-        if (gamepad2.a) {
-            map.getArm1().setPosition(1);
-            map.getArm2().setPosition(1);
-        } else if (gamepad2.y) {
-            map.getArm1().setPosition(0);
-            map.getArm2().setPosition(0);
         }
 
         //lift control
@@ -245,17 +249,12 @@ public class DriveButtonOpMode extends DriveOpMode {
             map.getLift().setPower(0);
         }
 
-        addData("lift: ", map.getLift().getCurrentPosition());
+        addData("lift: ", liftPos);
         addData("Overrride: ", liftOverride);
         addData("Motor Status: ", map.getLift().getMode());
         addData("trigger: ", gamepad2.left_trigger);
 
         for(Button button : buttons) button.press();
-
-        addData("lift: ", map.getLift().getCurrentPosition());
-        addData("Overrride: ", liftOverride);
-        addData("Motor Status: ", map.getLift().getMode());
-        addData("trigger: ", gamepad2.left_trigger);
         updateTelemetry();
     }
 

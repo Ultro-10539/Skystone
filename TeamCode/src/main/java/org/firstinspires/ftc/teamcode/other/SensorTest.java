@@ -30,7 +30,7 @@ public class SensorTest extends AutoOpMode {
     @Override
     public void run() {
         while(opModeisActive()) {
-            ExpansionHubEx hub = DeviceMap.getInstance().getExpansionHub();
+            ExpansionHubEx hub = DeviceMap.getInstance().getExpansionHub3();
             RevBulkData bulkData = hub.getBulkInputData();
             for(DcMotor motor : driver.getMotors()) {
                 telemetry.addLine("Motor Position: " + bulkData.getMotorCurrentPosition(motor));

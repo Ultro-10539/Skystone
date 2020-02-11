@@ -11,7 +11,8 @@ import org.openftc.revextensions2.RevBulkData;
 public class UltroMotor extends UltroThread {
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
             leftIntake, rightIntake, conveyer, lift;
-    private ExpansionHubEx hubEx;
+
+    private ExpansionHubEx hubEx3, hubEx2;
     public UltroMotor() {
         super();
     }
@@ -27,29 +28,38 @@ public class UltroMotor extends UltroThread {
         conveyer = map.getConveyer();
         lift = map.getLift();
 
-        hubEx = map.getExpansionHub();
+        hubEx3 = map.getExpansionHub3();
+        hubEx2 = map.getExpansionHub2();
+
     }
 
     @Override
     public void go() {
-        experimentalUpdate();
+        slowUpdate();
     }
 
     private void experimentalUpdate() {
-        if(hubEx == null) {
+        if(hubEx3 == null) {
             slowUpdate();
             return;
         }
-        RevBulkData data = hubEx.getBulkInputData();
-        if(data == null) {
+        RevBulkData data3 = hubEx3.getBulkInputData();
+        if(data3 == null) {
             slowUpdate();
             return;
         }
 
-        RobotData.leftTop = data.getMotorCurrentPosition(leftTop);
-        RobotData.leftBottom = data.getMotorCurrentPosition(leftBottom);
-        RobotData.rightTop = data.getMotorCurrentPosition(rightTop);
-        RobotData.rightBottom = data.getMotorCurrentPosition(rightBottom);
+        RobotData.leftTop = data3.getMotorCurrentPosition(leftTop);
+        RobotData.leftBottom = data3.getMotorCurrentPosition(leftBottom);
+        RobotData.rightTop = data3.getMotorCurrentPosition(rightTop);
+        RobotData.rightBottom = data3.getMotorCurrentPosition(rightBottom);
+
+        RevBulkData data2 = hubEx2.getBulkInputData();
+
+        RobotData.conveyer = data2.getMotorCurrentPosition(conveyer);
+        RobotData.lift = data2.getMotorCurrentPosition(lift);
+        RobotData.leftIntake = data2.getMotorCurrentPosition(leftIntake);
+        RobotData.rightIntake = data2.getMotorCurrentPosition(rightIntake);
     }
 
     private synchronized void slowUpdate() {

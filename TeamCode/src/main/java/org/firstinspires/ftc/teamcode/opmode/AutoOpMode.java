@@ -83,6 +83,7 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
         map.deactivateTfod();
         map.deactivateOpenCV();
         map.deactivateVuforia();
+        map.deactivateLedDriver();
 
     }
 

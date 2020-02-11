@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 public final class MecanumDriver implements IDriver {
     private static final double TURN_OFFSET = 2.5F;
+    private static final double MIN_POWER = 0.35D;
 
     private boolean test;
     private DeviceMap map;
@@ -130,11 +131,14 @@ public final class MecanumDriver implements IDriver {
      */
     @Override
     public void move(Direction direction, double power) {
+        move(direction, power, power, power, power);
+    }
 
-        map.getLeftTop().setPower(direction.getLeftTop() * power);
-        map.getRightBottom().setPower(direction.getRightBottom() * power);
-        map.getRightTop().setPower(direction.getRightTop() * power);
-        map.getLeftBottom().setPower(direction.getLeftBottom() * power);
+    public void move(Direction direction, double leftTop, double rightTop, double leftBottom, double rightBottom) {
+        map.getLeftTop().setPower(direction.getLeftTop() * leftTop);
+        map.getRightBottom().setPower(direction.getRightBottom() * rightBottom);
+        map.getRightTop().setPower(direction.getRightTop() * rightTop);
+        map.getLeftBottom().setPower(direction.getLeftBottom() * leftBottom);
     }
 
     @Override
@@ -186,33 +190,13 @@ public final class MecanumDriver implements IDriver {
         move(direction, power);
 
         while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
-            current = getMotorCounts();
-            addData("leftTop origin: " + current[0] + " leftTopTarget: ", leftTopTarget);
-            addData("rightTop origin: " + current[1] + " rightTopTarget: ", rightTopTarget);
-            addData("leftBottom origin: " + current[2] + "leftBottomTarget: ", leftBottomTarget);
-            addData("rightBottom origin: " + current[3] + "rightBottomTarget: ", rightBottomTarget);
-            if (gyroAssist){
-                double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
-                addData("initial angle", initialAngle);
-                addData("angle", angle);
-                addData("power", power);
-                if (angle > initialAngle + 2) {
-                    addData("Increasing right side", correctedPower);
-                    gyroAssist(direction.getRightSide(), power + 0.1);
-                    gyroAssist(direction.getLeftSide(), correctedPower);
-                } else if(angle < initialAngle - 2) {
-                    addData("Increasing left side", correctedPower);
-                    gyroAssist(direction.getLeftSide(), power + 0.1);
-                    gyroAssist(direction.getRightSide(), correctedPower);
-                }else {
-                    addData("normal", "side");
-                    move(direction, power);
-                }
-                updateTelemetry();
+            double[] powers = calculatePowerFromMotor(power, leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget);
 
+            if (gyroAssist){
+                gyroAssistor(powers, direction, initialAngle, angle, power);
                 UltroImu imu = Threader.get(UltroImu.class);
                 angle = imu.getAngle();
-            }
+            }else move(direction, powers[0], powers[1], powers[2], powers[3]);
         }
 
         stop();
@@ -223,6 +207,29 @@ public final class MecanumDriver implements IDriver {
         }
     }
 
+    private void gyroAssistor(double[] powers, Direction direction, double initialAngle, double angle, double power) {
+        double[] newPowers = new double[powers.length];
+        for(double motorPower : powers) {
+            double correctedPower = power * calculatePowerMultiplierLinear(0, angle, motorPower);
+            if(angle > initialAngle + 2) {
+                for(int id : direction.getRightSide()) {
+                    newPowers[id] = motorPower + 0.1D;
+                }
+                for(int id : direction.getLeftSide()) {
+                    newPowers[id] = correctedPower;
+                }
+            }else if(angle < initialAngle - 2) {
+                for(int id : direction.getRightSide()) {
+                    newPowers[id] = correctedPower;
+                }
+                for(int id : direction.getLeftSide()) {
+                    newPowers[id] = motorPower + 0.1;
+                }
+            }else newPowers = powers;
+        }
+        move(direction, newPowers[0], newPowers[1], newPowers[2], newPowers[3]);
+
+    }
     /**
      * encoder drive
      * @param direction
@@ -314,6 +321,34 @@ public final class MecanumDriver implements IDriver {
             DcMotor motor = map.getDriveMotors()[index];
             motor.setPower(power);
         }
+    }
+
+    /**
+     *
+     * @param MAX_POWER
+     * @param leftTopTarget
+     * @param rightTopTarget
+     * @param leftBottomTarget
+     * @param rightBottomTarget
+     * @return
+     */
+    private double[] calculatePowerFromMotor(final double MAX_POWER, int leftTopTarget, int rightTopTarget, int leftBottomTarget, int rightBottomTarget) {
+        int[] currents = getMotorCounts();
+        int[] futures = new int[] {leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget};
+        int size = currents.length;
+        double[] powers = new double[size];
+        for(int i = 0; i < size; i++) {
+            double current = (double) currents[i];
+            double average = (current + (double) futures[i])/2D;
+
+            double power = -FastMath.pow2(current - average) + 1.2D;
+
+            if(power > MAX_POWER) power = MAX_POWER;
+            else if(power < MIN_POWER) power = MIN_POWER;
+            powers[i] = power;
+        }
+
+        return powers;
     }
 
     /**

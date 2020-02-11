@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.threading;
 
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
+import org.firstinspires.ftc.teamcode.threading.control.UltroDistSensor;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 import org.firstinspires.ftc.teamcode.threading.control.UltroMotor;
 
@@ -20,6 +21,7 @@ public final class Threader {
 
         registerRunnable(UltroImu.class);
         registerRunnable(UltroMotor.class);
+        registerRunnable(UltroDistSensor.class);
     }
 
     public static void destroy() {

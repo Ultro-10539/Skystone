@@ -19,6 +19,7 @@ public abstract class AutoPart1 extends AutoOpMode {
         map.setupSensors(hardwareMap);
         map.setupServos(hardwareMap);
         map.setupOpenCV(hardwareMap);
+        map.setUpLEDs(hardwareMap);
 
         int orient = hardwareMap.appContext.getResources().getConfiguration().orientation;
         map.getCamera().setPipeline(pipeline = new SkystonePipeline(orient, 640, 480));
