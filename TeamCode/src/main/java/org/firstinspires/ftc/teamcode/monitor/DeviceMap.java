@@ -46,7 +46,7 @@ public final class DeviceMap {
     private DcMotor[] intakeMotors;
     private DcMotor[] allMotors;
 
-    private Servo leftAuto, rightAuto, leftFinger, rightFinger, foundation, arm1, arm2, claw;
+    private Servo leftAuto, rightAuto, leftFinger, rightFinger, foundationLeft, foundationRight, arm1, arm2, claw;
     private Servo[] servos;
 
     private RevBlinkinLedDriver ledDriver;
@@ -145,14 +145,15 @@ public final class DeviceMap {
         rightAuto = map.get(Servo.class, "RightAuto");
         leftFinger = map.get(Servo.class, "LeftFinger");
         rightFinger = map.get(Servo.class, "RightFinger");
-        foundation = map.get(Servo.class, "foundation");
+        foundationLeft = map.get(Servo.class, "foundationLeft");
+        foundationRight = map.get(Servo.class, "foundationRight");
 
         arm1 = map.get(Servo.class, "Arm1");
         arm2 = map.get(Servo.class, "Arm2");
         claw = map.get(Servo.class, "Claw");
 
         this.servos =  new Servo[]{
-                leftAuto, rightAuto, leftFinger, rightFinger, claw, arm1, arm2
+                leftAuto, rightAuto, leftFinger, rightFinger, foundationLeft, foundationRight, arm1, arm2
         };
     }
 
@@ -378,8 +379,12 @@ public final class DeviceMap {
         return claw;
     }
 
-    public Servo getFoundation(){
-        return foundation;
+    public Servo getFoundationLeft(){
+        return foundationLeft;
+    }
+
+    public Servo getFoundationRight(){
+        return foundationRight;
     }
 
     public DcMotor[] getAllMotors() {

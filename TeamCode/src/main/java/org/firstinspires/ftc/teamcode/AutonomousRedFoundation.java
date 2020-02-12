@@ -15,7 +15,8 @@ public class AutonomousRedFoundation extends AutoPart1{
     @Override
     public void run(){
         DeviceMap map = DeviceMap.getInstance();
-        driver.turn(1.0, -90);
+        driver.move(Direction.FORWARD, 0.5, 10, true);
+        driver.turn(0.5, -90);
     }
 
 }
