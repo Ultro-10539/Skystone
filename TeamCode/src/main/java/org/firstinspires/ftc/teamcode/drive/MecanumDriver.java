@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.threading.Threader;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
+import java.util.Arrays;
+
 public final class MecanumDriver implements IDriver {
     private static final double TURN_OFFSET = 2.5F;
     private static final double MIN_POWER = 0.35D;
@@ -116,8 +118,6 @@ public final class MecanumDriver implements IDriver {
 
     public void stopAndReset(){
         stop();
-        addData("finished moving", 0.0);
-        updateTelemetry();
         for (DcMotor motor : motors) {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -190,8 +190,15 @@ public final class MecanumDriver implements IDriver {
         move(direction, power);
 
         while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
+            int[] currents = getMotorCounts();
+            addData("leftTop count:" + currents[0] + " leftTop target: ", leftTopTarget);
+            addData("rightTop count:" + currents[1] + " rightTop target: ", rightTopTarget);
+            addData("leftBottom count:" + currents[2] + " leftBottom target: ", leftBottomTarget);
+            addData("rightBottom count:" + currents[3] + " leftTop target: ", rightBottomTarget);
+            updateTelemetry();
             double[] powers = calculatePowerFromMotor(power, leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget);
 
+            addData("powers: ", Arrays.toString(powers));
             if (gyroAssist){
                 gyroAssistor(powers, direction, initialAngle, angle, power);
                 UltroImu imu = Threader.get(UltroImu.class);
@@ -199,12 +206,7 @@ public final class MecanumDriver implements IDriver {
             }else move(direction, powers[0], powers[1], powers[2], powers[3]);
         }
 
-        stop();
-
-        for(DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+        stopAndReset();
     }
 
     private void gyroAssistor(double[] powers, Direction direction, double initialAngle, double angle, double power) {
@@ -382,10 +384,10 @@ public final class MecanumDriver implements IDriver {
     }
 
     public int[] getMotorCounts() {
-        int leftTop = RobotData.leftTop;
-        int rightTop = RobotData.rightTop;
-        int leftBottom = RobotData.leftBottom;
-        int rightBottom = RobotData.rightBottom;
+        int leftTop = RobotData.getLeftTop();
+        int rightTop = RobotData.getRightTop();
+        int leftBottom = RobotData.getLeftBottom();
+        int rightBottom = RobotData.getRightBottom();
 
         return new int[] { leftTop, rightTop, leftBottom, rightBottom};
     }

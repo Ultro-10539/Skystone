@@ -49,17 +49,18 @@ public class UltroMotor extends UltroThread {
             return;
         }
 
-        RobotData.leftTop = data3.getMotorCurrentPosition(leftTop);
-        RobotData.leftBottom = data3.getMotorCurrentPosition(leftBottom);
-        RobotData.rightTop = data3.getMotorCurrentPosition(rightTop);
-        RobotData.rightBottom = data3.getMotorCurrentPosition(rightBottom);
+        int leftTopCount = data3.getMotorCurrentPosition(leftTop);
+        int leftBottomCount = data3.getMotorCurrentPosition(leftBottom);
+        int rightTopCount = data3.getMotorCurrentPosition(rightTop);
+        int rightBottomCount = data3.getMotorCurrentPosition(rightBottom);
 
         RevBulkData data2 = hubEx2.getBulkInputData();
 
-        RobotData.conveyer = data2.getMotorCurrentPosition(conveyer);
-        RobotData.lift = data2.getMotorCurrentPosition(lift);
-        RobotData.leftIntake = data2.getMotorCurrentPosition(leftIntake);
-        RobotData.rightIntake = data2.getMotorCurrentPosition(rightIntake);
+        int conveyerCount = data2.getMotorCurrentPosition(conveyer);
+        int liftCount = data2.getMotorCurrentPosition(lift);
+        int leftIntakeCount = data2.getMotorCurrentPosition(leftIntake);
+        int rightIntakeCount = data2.getMotorCurrentPosition(rightIntake);
+        RobotData.updateValues(leftTopCount, leftBottomCount, rightTopCount, rightBottomCount, conveyerCount, liftCount, leftIntakeCount, rightIntakeCount);
     }
 
     private synchronized void slowUpdate() {

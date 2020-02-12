@@ -50,25 +50,25 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         map.getRightFinger().setPosition(0.5);
 
         //Drives forwards a bit
-        while(RobotData.distBack <= 100){
+        while(RobotData.getDistBack() <= 100){
             driver.move(Direction.BACKWARD, 0.3);
         }
         driver.move(Direction.BACKWARD, 0);
 
         //Strafes to line up with wall
-        while(RobotData.distRight > 5){
+        while(RobotData.getDistRight() > 5){
             driver.move(Direction.LEFT, 0.7);
         }
         driver.move(Direction.LEFT, 0);
 
         //Line up with correct block
         if (pos == Status.LEFT_CORNER){
-            while(RobotData.distRight < 40){
+            while(RobotData.getDistRight() < 40){
                 driver.move(Direction.RIGHT, 0.7);
             }
             driver.move(Direction.RIGHT, 0);
         } else if(pos == Status.MIDDLE){
-            while(RobotData.distRight < 15){
+            while(RobotData.getDistRight() < 15){
                 driver.move(Direction.RIGHT, 0.7);
             }
             driver.move(Direction.RIGHT, 0);
@@ -76,7 +76,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
         //Drive up to blocks
         driver.move(Direction.BACKWARD, 0.3);
-        while((RobotData.distColorLeft >= 20) || (RobotData.distColorLeft >= 20)){
+        while((RobotData.getDistColorLeft() >= 20) || (RobotData.getDistColorRight() >= 20)){
 
         }
         driver.move(Direction.BACKWARD, 0);
@@ -86,6 +86,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         map.getRightFinger().setPosition(0.0);
         sleep(1000);
         map.getRightAuto().setPosition(0.6);
+        sleep(500);
 
         //move forward and strafe to foundation then move back again
         driver.move(Direction.FORWARD, 0.3);
@@ -108,7 +109,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
         }
         driver.move(Direction.RIGHT, 1, distRight);
-        while((RobotData.distColorLeft >= 20) || (RobotData.distColorLeft >= 20)){
+        while((RobotData.getDistColorLeft() >= 20) || (RobotData.getDistColorRight() >= 20)){
             driver.move(Direction.BACKWARD, 0.3);
         }
         driver.move(Direction.BACKWARD, 0);
@@ -131,7 +132,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
     private void correctLocation() {
         //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
         driver.move(Direction.FORWARD, 0.7);
-        while (RobotData.distBack > 115) {
+        while (RobotData.getDistLeft() > 115) {
 
         }
         driver.stop();
