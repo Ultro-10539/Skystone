@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
-import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "AutoBlueFoundation")
 public class AutonomousBlueFoundation extends AutoPart1 {
@@ -16,7 +15,7 @@ public class AutonomousBlueFoundation extends AutoPart1 {
         driver.move(Direction.BACKWARD, 0.3, 20);
 
         //drop stone and grab foundation
-        map.getFoundation().setPosition(1.0);
+        map.getFoundationLeft().setPosition(1.0);
         sleep(1000);
 
         //drive to wall then turn

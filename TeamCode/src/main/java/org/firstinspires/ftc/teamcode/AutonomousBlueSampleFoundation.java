@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.bluetooth.BluetoothClass;
-
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.monitor.RobotData;
 import org.firstinspires.ftc.teamcode.skystone.Status;
-import org.openftc.revextensions2.ExpansionHubMotor;
 
 @Autonomous(name = "AutonomousBlueSampleFoundation")
 public class AutonomousBlueSampleFoundation extends AutoPart1 {
@@ -122,7 +118,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         sleep(1000);
         map.getRightFinger().setPosition(0.0);
         sleep(1000);
-        map.getFoundation().setPosition(1.0);
+        map.getFoundationLeft().setPosition(1.0);
         sleep(1000);
 
         //drive to wall then turn

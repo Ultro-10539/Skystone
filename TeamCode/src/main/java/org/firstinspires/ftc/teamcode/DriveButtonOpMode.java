@@ -210,10 +210,12 @@ public class DriveButtonOpMode extends DriveOpMode {
         driver.conveyer(-gamepad2.right_trigger);
 
 
-        if (gamepad2.left_trigger > 0) {
-            map.getFoundation().setPosition(1);
+        if (gamepad1.right_trigger > 0) {
+            map.getFoundationLeft().setPosition(1);
+            map.getFoundationRight().setPosition(0);
         } else {
-            map.getFoundation().setPosition(0);
+            map.getFoundationLeft().setPosition(0);
+            map.getFoundationRight().setPosition(1);
 
         }
 
