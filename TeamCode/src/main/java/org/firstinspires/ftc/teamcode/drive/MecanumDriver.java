@@ -376,7 +376,7 @@ public final class MecanumDriver implements IDriver {
         int[] current = getMotorCounts();
         int[] target = new int[] { leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget };
         for(int i = 0; i < current.length; i++) {
-            if(FastMath.abs(current[i]) < target[i]) return true;
+            if(FastMath.abs(current[i]) < FastMath.abs(target[i])) return true;
         }
         return false;
     }

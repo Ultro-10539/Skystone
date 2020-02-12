@@ -68,9 +68,6 @@ public class UltroMotor extends UltroThread {
             leftBottom.getCurrentPosition(),
             rightTop.getCurrentPosition(),
             rightBottom.getCurrentPosition(),
-            leftIntake.getCurrentPosition(),
-            rightIntake.getCurrentPosition(),
-            conveyer.getCurrentPosition(),
-            lift.getCurrentPosition());
+            0,0,0,0);
     }
 }
