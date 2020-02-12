@@ -88,8 +88,6 @@ public final class DeviceMap {
     public void setUpExpansionHub(HardwareMap map) {
         this.expansionHub3 = map.get(ExpansionHubEx.class, "Expansion Hub 3");
         this.expansionHub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
-
-        this.expansionHub2.setAllI2cBusSpeeds(ExpansionHubEx.I2cBusSpeed.HIGH_3_4M);
     }
     /**
      * This will just set up all the driveMotors

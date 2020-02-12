@@ -20,7 +20,6 @@ public class DataOpMode extends AutoOpMode  {
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.setupSensors(hardwareMap);
-        mapper.setUpImu(hardwareMap);
 
     }
 

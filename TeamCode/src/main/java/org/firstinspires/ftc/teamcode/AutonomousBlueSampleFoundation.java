@@ -10,10 +10,12 @@ import org.firstinspires.ftc.teamcode.monitor.RobotData;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "AutonomousBlueSampleFoundation")
-public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
+public class AutonomousBlueSampleFoundation extends AutoPart1 {
+    private DeviceMap map;
     private Status pos;
     @Override
     public void beforeLoop() {
+        map = DeviceMap.getInstance();
         Status status = skystone();
         telemetry.addData("Status: ", status.name());
         updateTelemetry();
@@ -43,7 +45,6 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
     }
 
     public void sampleFoundation() {
-        DeviceMap map = DeviceMap.getInstance();
         driver.stopAndReset();
         //Prepares servo arms
         map.getRightAuto().setPosition(0.3);
@@ -91,13 +92,22 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         //TODO: this is inconsistent
         sleep(400);
         driver.move(Direction.FORWARD, 0);
-        if (pos == Status.LEFT_CORNER){
-            driver.move(Direction.RIGHT, 0.7, 108);
-        } else if(pos == Status.MIDDLE){
-            driver.move(Direction.RIGHT, 0.7, 114);
-        } else {
-            driver.move(Direction.RIGHT, 0.7, 120);
+        int distRight;
+        switch (pos) {
+            case LEFT_CORNER:
+                distRight = 108;
+                break;
+            case MIDDLE:
+                distRight = 114;
+                break;
+            case RIGHT_CORNER:
+                distRight = 120;
+                break;
+            default:
+                distRight = 50;
+
         }
+
         while(!((map.getSensorColorLeftDist().getDistance(DistanceUnit.CM) <= 20) || (map.getSensorColorRightDist().getDistance(DistanceUnit.CM) <= 20))){
             driver.move(Direction.BACKWARD, 0.3);
         }
@@ -116,5 +126,14 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         sleep(1000);
         driver.move(Direction.FORWARD, 0);
         driver.turn(0.7, 90);
+    }
+
+    private void correctLocation() {
+        //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
+        driver.move(Direction.FORWARD, 0.7);
+        while (RobotData.distBack > 115) {
+
+        }
+        driver.stop();
     }
 }

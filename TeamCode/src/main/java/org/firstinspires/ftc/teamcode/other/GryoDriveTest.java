@@ -30,6 +30,6 @@ public class GryoDriveTest extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Direction.FORWARD, 0.5, 48, true);
+        driver.move(Direction.FORWARD, 1, 24, true);
     }
 }
