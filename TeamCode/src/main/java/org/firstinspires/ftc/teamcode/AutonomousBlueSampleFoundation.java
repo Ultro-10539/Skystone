@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.monitor.RobotData;
@@ -74,7 +75,7 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         }
 
         //Drive up to blocks
-        while(!(RobotData.distColorLeft <= 20) || (RobotData.distColorLeft <= 20)){
+        while(!((map.getSensorColorLeftDist().getDistance(DistanceUnit.CM) <= 20) || (map.getSensorColorRightDist().getDistance(DistanceUnit.CM) <= 20))){
             driver.move(Direction.BACKWARD, 0.3);
         }
         driver.move(Direction.BACKWARD, 0);
@@ -97,7 +98,7 @@ public class AutonomousBlueSampleFoundation extends AutonomousBlueSample {
         } else {
             driver.move(Direction.RIGHT, 0.7, 120);
         }
-        while(!(RobotData.distColorLeft <= 20) || (RobotData.distColorLeft <= 20)){
+        while(!((map.getSensorColorLeftDist().getDistance(DistanceUnit.CM) <= 20) || (map.getSensorColorRightDist().getDistance(DistanceUnit.CM) <= 20))){
             driver.move(Direction.BACKWARD, 0.3);
         }
         driver.move(Direction.BACKWARD, 0);
