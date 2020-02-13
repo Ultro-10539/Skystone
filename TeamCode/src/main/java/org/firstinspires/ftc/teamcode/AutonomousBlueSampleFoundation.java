@@ -122,13 +122,16 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
                 distRight = 114;
                 break;
             case RIGHT_CORNER:
-                distRight = 120;
+                distRight = 100;
                 break;
             default:
                 distRight = 50;
 
         }
-        driver.move(Direction.RIGHT, 0.7, distRight);
+
+        driver.turn(0.5, 83);
+        driver.move(Direction.BACKWARD, 0.7, distRight, true);
+        driver.turn(0.5, -83);
         while(!(colorLeft.getDistance(DistanceUnit.CM) <= 13 || colorRight.getDistance(DistanceUnit.CM) <= 13)){
             driver.move(Direction.BACKWARD, 0.3);
         }
@@ -144,10 +147,13 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         sleep(1000);
 
         //drive to wall then turn
-        driver.move(Direction.FORWARD, 0.3);
-        sleep(1000);
-        driver.move(Direction.FORWARD, 0);
-        driver.turn(0.7, 90);
+
+        driver.move(Direction.FORWARD, 0.3, 30);
+        driver.turn(0.7, 83);
+        map.getFoundationLeft().setPosition(0);
+        map.getFoundationRight().setPosition(1.0);
+        //strafe left
+        //park
     }
     private void correctLocation() {
         //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
