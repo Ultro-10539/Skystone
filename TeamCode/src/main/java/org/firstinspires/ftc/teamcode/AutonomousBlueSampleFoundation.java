@@ -11,44 +11,8 @@ import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "AutonomousBlueSampleFoundation")
 public class AutonomousBlueSampleFoundation extends AutoPart1 {
-    private DeviceMap map;
-    private Status pos;
-
-
-
-    private DistanceSensor left, back, right, colorLeft, colorRight;
     @Override
     public void beforeLoop() {
-        map = DeviceMap.getInstance();
-
-        left = map.getDistanceLeft();
-        back = map.getDistanceBack();
-        right = map.getDistanceRight();
-
-        colorLeft = map.getSensorColorLeftDist();
-        colorRight = map.getSensorColorRightDist();
-
-        Status status = skystone();
-        telemetry.addData("Status: ", status.name());
-        updateTelemetry();
-        pos = status;
-
-        DeviceMap map = DeviceMap.getInstance();
-        RevBlinkinLedDriver driver = map.getLedDriver();
-        switch (pos) {
-            case MIDDLE:
-                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                break;
-            case LEFT_CORNER:
-                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-                break;
-            case RIGHT_CORNER:
-                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-                break;
-            default:
-                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-                break;
-        }
     }
 
     @Override

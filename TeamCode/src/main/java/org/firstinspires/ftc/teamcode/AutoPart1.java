@@ -1,15 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.skystone.SkystonePipeline;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
 public abstract class AutoPart1 extends AutoOpMode {
-    @Override
-    public void preInit() {
-        super.preInit();
-    }
+    protected Status pos;
+    protected DeviceMap map;
+    protected DistanceSensor left, back, right, colorLeft, colorRight;
+
 
     protected SkystonePipeline pipeline;
     @Override
@@ -25,12 +28,41 @@ public abstract class AutoPart1 extends AutoOpMode {
         map.getCamera().setPipeline(pipeline = new SkystonePipeline(orient, 640, 480));
 
         DeviceMap.getInstance().getCamera().startStreaming(pipeline.getRows(), pipeline.getCols());
+
+        map = DeviceMap.getInstance();
+
+        left = map.getDistanceLeft();
+        back = map.getDistanceBack();
+        right = map.getDistanceRight();
+
+        colorLeft = map.getSensorColorLeftDist();
+        colorRight = map.getSensorColorRightDist();
     }
 
 
     @Override
     public void beforeLoop() {
 
+        Status status = skystone();
+        telemetry.addData("Status: ", status.name());
+        updateTelemetry();
+        pos = status;
+
+        RevBlinkinLedDriver driver = map.getLedDriver();
+        switch (pos) {
+            case MIDDLE:
+                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                break;
+            case LEFT_CORNER:
+                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                break;
+            case RIGHT_CORNER:
+                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                break;
+            default:
+                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_WHITE);
+                break;
+        }
     }
 
     protected Status skystone() {
