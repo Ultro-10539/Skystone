@@ -33,10 +33,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
     }
     protected void sampleFoundation() {
         //Strafes to line up with wall
-        while(right.getDistance(DistanceUnit.CM) > 5){
-            driver.move(Direction.LEFT, 0.7);
-        }
-        driver.move(Direction.LEFT, 0);
+        driver.moveUntil(Direction.LEFT, 0.7, data -> data.getRightDistance() <= 5);
 
         //Line up with correct block
         if (pos == Status.LEFT_CORNER){
@@ -45,7 +42,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
             }
             driver.move(Direction.RIGHT, 0);
         } else if(pos == Status.MIDDLE){
-            while(right.getDistance(DistanceUnit.CM) < 17){
+            while(right.getDistance(DistanceUnit.CM) < 15.5){
                 driver.move(Direction.RIGHT, 0.7);
             }
             driver.move(Direction.RIGHT, 0);
@@ -80,7 +77,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         //pick up blocks
         map.getRightAuto().setPosition(0.0);
         map.getRightFinger().setPosition(0.0);
-        sleep(1000);
+        sleep(500);
         map.getRightAuto().setPosition(0.6);
         sleep(500);
 
@@ -90,7 +87,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
     protected void afterPickUp() {
 
         //move forward and turn then drive to foundation then move back
-        driver.move(Direction.FORWARD, 0.3, 5);
+        driver.move(Direction.FORWARD, 0.3, 5.75);
         driver.turn(0.5, 83);
 
         //line up with wall
@@ -113,7 +110,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
         //drop stone and grab foundation
         map.getRightFinger().setPosition(0.5);
-        sleep(1000);
+        sleep(500);
         map.getRightFinger().setPosition(0.0);
         map.getFoundationLeft().setPosition(1.0);
         map.getFoundationRight().setPosition(0);
@@ -127,7 +124,6 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         map.getFoundationLeft().setPosition(0);
         map.getFoundationRight().setPosition(1.0);
         sleep(750);
-        driver.move(Direction.LEFT, 0.8, 9);
     }
 
         /**
@@ -136,10 +132,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
          */
     protected void park() {
         //strafe left
-        while(right.getDistance(DistanceUnit.CM) < 77){
-            driver.move(Direction.LEFT, 0.7);
-        }
-        driver.move(Direction.LEFT, 0);
+        driver.moveUntil(Direction.LEFT, 0.7, data -> right.getDistance(DistanceUnit.CM) < 77);
         //park
         driver.move(Direction.FORWARD, 0.7, 40);
     }
