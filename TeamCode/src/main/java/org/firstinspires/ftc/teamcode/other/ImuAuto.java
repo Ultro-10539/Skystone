@@ -37,7 +37,7 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Direction.RIGHT, 0.75F, 40, true);
+        driver.turn(0.65,85F);
 
         telemetry.addLine("Passed turning negative thrice");
 

@@ -20,8 +20,6 @@ public final class Threader {
         service = Executors.newScheduledThreadPool(5, Executors.defaultThreadFactory());
 
         registerRunnable(UltroImu.class);
-        registerRunnable(UltroMotor.class);
-        registerRunnable(UltroDistSensor.class);
     }
 
     public static void destroy() {

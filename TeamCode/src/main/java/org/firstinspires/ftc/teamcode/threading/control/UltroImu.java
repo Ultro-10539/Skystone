@@ -21,6 +21,7 @@ public class UltroImu extends UltroThread {
     }
 
     public void setUp(DeviceMap map) {
+        if(map.getImu() == null) return;
         this.imu = map.getImu();
         lastAngles = getOrientation();
     }
@@ -50,7 +51,6 @@ public class UltroImu extends UltroThread {
         globalAngle += deltaAngle;
 
         lastAngles = angles;
-
     }
 
     @Override

@@ -20,14 +20,19 @@ public class DataOpMode extends AutoOpMode  {
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.setupSensors(hardwareMap);
-
+        mapper.setUpImu(hardwareMap);
     }
 
     @Override
     public void beforeLoop() {
         DeviceMap map = DeviceMap.getInstance();
 
-        telemetry.addLine(RobotData.hello());
+        for(DcMotor sensor : map.getAllMotors()) {
+            telemetry.addData("motor", sensor.getCurrentPosition());
+        }
+        for(DistanceSensor sensor : map.getDistanceSensors()) {
+            telemetry.addData("sensor (cm): ", sensor.getDistance(DistanceUnit.CM));
+        }
         for(Servo servo : map.getServos()) {
             telemetry.addData("servo:", servo.getPosition());
         }

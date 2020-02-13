@@ -33,6 +33,6 @@ public abstract class UltroThread implements Runnable {
         return TimeUnit.MILLISECONDS;
     }
     public long getTime() {
-        return 5L;
+        return 10L;
     }
 }

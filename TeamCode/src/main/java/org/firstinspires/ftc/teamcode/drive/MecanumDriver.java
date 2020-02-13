@@ -188,49 +188,80 @@ public final class MecanumDriver implements IDriver {
             if(linear == null) return;
         }
         move(direction, power);
-
+        RobotLog.d("ULTRO", "START DRIVE");
         while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
-            int[] currents = getMotorCounts();
-            addData("leftTop count:" + currents[0] + " leftTop target: ", leftTopTarget);
-            addData("rightTop count:" + currents[1] + " rightTop target: ", rightTopTarget);
-            addData("leftBottom count:" + currents[2] + " leftBottom target: ", leftBottomTarget);
-            addData("rightBottom count:" + currents[3] + " leftTop target: ", rightBottomTarget);
-            updateTelemetry();
-            double[] powers = calculatePowerFromMotor(power, leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget);
-
-            addData("powers: ", Arrays.toString(powers));
             if (gyroAssist){
-                gyroAssistor(powers, direction, initialAngle, angle, power);
+                gyroAssistor(direction, initialAngle, angle, power);
                 UltroImu imu = Threader.get(UltroImu.class);
                 angle = imu.getAngle();
-            }else move(direction, powers[0], powers[1], powers[2], powers[3]);
+            }else move(direction, power);
+            RobotLog.dd("ULTRO", Arrays.toString(new double[]{
+                map.getLeftTop().getPower(),
+                map.getRightTop().getPower(),
+                map.getRightBottom().getPower(),
+                map.getLeftBottom().getPower()
+            }));
         }
 
         stopAndReset();
     }
 
-    private void gyroAssistor(double[] powers, Direction direction, double initialAngle, double angle, double power) {
-        double[] newPowers = new double[powers.length];
-        for(double motorPower : powers) {
-            double correctedPower = power * calculatePowerMultiplierLinear(0, angle, motorPower);
-            if(angle > initialAngle + 2) {
-                for(int id : direction.getRightSide()) {
-                    newPowers[id] = motorPower + 0.1D;
+    private void gyroAssistor(Direction direction, double initialAngle, double angle, double power) {
+        addData("hello", "gyroAssistor");
+        updateTelemetry();
+        double[] newPowers = new double[] {power, power, power, power};
+        double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
+        switch (direction) {
+            case FORWARD:
+            case BACKWARD:
+                if(angle > initialAngle + 2) {
+                    //POWER UP RIGHT SIDE
+                    for(int id : direction.getRightSide()) {
+                        newPowers[id] = power + 0.1D;
+                    }
+                    for(int id : direction.getLeftSide()) {
+                        newPowers[id] = correctedPower;
+                    }
+                }else if(angle < initialAngle - 2) {
+                    //POWER UP LEFT SIDE
+                    for(int id : direction.getRightSide()) {
+                        newPowers[id] = correctedPower;
+                    }
+                    for(int id : direction.getLeftSide()) {
+                        newPowers[id] = power + 0.1;
+                    }
                 }
-                for(int id : direction.getLeftSide()) {
-                    newPowers[id] = correctedPower;
-                }
-            }else if(angle < initialAngle - 2) {
-                for(int id : direction.getRightSide()) {
-                    newPowers[id] = correctedPower;
-                }
-                for(int id : direction.getLeftSide()) {
-                    newPowers[id] = motorPower + 0.1;
-                }
-            }else newPowers = powers;
-        }
-        move(direction, newPowers[0], newPowers[1], newPowers[2], newPowers[3]);
+                break;
+            case LEFT:
 
+                if(angle > initialAngle + 2) {
+                    newPowers[0] = power - 0.1D;
+                    newPowers[1] = power + 0.1D;
+                    newPowers[2] = correctedPower;
+                    newPowers[3] = -correctedPower;
+                }else if(angle < initialAngle - 2) {
+                    newPowers[3] = power - 0.1D;
+                    newPowers[2] = power + 0.1D;
+                    newPowers[1] = correctedPower;
+                    newPowers[0] = -correctedPower;
+                }
+                break;
+            case RIGHT:
+                if(angle > initialAngle + 2) {
+                    newPowers[0] = correctedPower;
+                    newPowers[1] = -correctedPower;
+                    newPowers[2] = power - 0.1D;
+                    newPowers[3] = power + 0.1D;
+                }else if(angle < initialAngle - 2) {
+                    newPowers[3] = correctedPower;
+                    newPowers[2] = -correctedPower;
+                    newPowers[1] = power - 0.1D;
+                    newPowers[0] = power + 0.1D;
+                }
+                break;
+        }
+
+        move(direction, newPowers[0], newPowers[1], newPowers[2], newPowers[3]);
     }
     /**
      * encoder drive
@@ -384,10 +415,10 @@ public final class MecanumDriver implements IDriver {
     }
 
     public int[] getMotorCounts() {
-        int leftTop = RobotData.getLeftTop();
-        int rightTop = RobotData.getRightTop();
-        int leftBottom = RobotData.getLeftBottom();
-        int rightBottom = RobotData.getRightBottom();
+        int leftTop = map.getLeftTop().getCurrentPosition();
+        int rightTop = map.getRightTop().getCurrentPosition();
+        int leftBottom = map.getLeftBottom().getCurrentPosition();
+        int rightBottom = map.getRightBottom().getCurrentPosition();
 
         return new int[] { leftTop, rightTop, leftBottom, rightBottom};
     }
