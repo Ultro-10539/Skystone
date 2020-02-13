@@ -248,15 +248,15 @@ public final class MecanumDriver implements IDriver {
                 break;
             case RIGHT:
                 if(angle > initialAngle + 2) {
-                    newPowers[0] = correctedPower;
-                    newPowers[1] = -correctedPower;
-                    newPowers[2] = power - 0.1D;
-                    newPowers[3] = power + 0.1D;
-                }else if(angle < initialAngle - 2) {
                     newPowers[3] = correctedPower;
                     newPowers[2] = -correctedPower;
                     newPowers[1] = power - 0.1D;
                     newPowers[0] = power + 0.1D;
+                }else if(angle < initialAngle - 2) {
+                    newPowers[0] = correctedPower;
+                    newPowers[1] = -correctedPower;
+                    newPowers[2] = power - 0.1D;
+                    newPowers[3] = power + 0.1D;
                 }
                 break;
         }
