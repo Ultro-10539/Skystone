@@ -113,6 +113,13 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         //park
         driver.move(Direction.FORWARD, 0.7, 55);
     }
+
+    /**
+     * 75
+     */
+    private void park() {
+
+    }
     private void correctLocation() {
         //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
         driver.move(Direction.FORWARD, 0.7);

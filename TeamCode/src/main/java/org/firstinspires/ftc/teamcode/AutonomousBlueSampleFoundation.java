@@ -52,12 +52,30 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         }
 
         //Drive up to blocks
-        while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)){
+        while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)) {
             driver.move(Direction.BACKWARD, 0.3);
         }
 
+            /*
+        //colloquially: move the left direction with left power until the right sensor reads under 5 centimeters
+        driver.moveUntil(Direction.LEFT, 0.7D, data -> data.getRightDistance() < 5);
+        switch (pos) {
+            case LEFT_CORNER:
+                driver.moveUntil(Direction.RIGHT, 0.7D, data -> data.getRightDistance() > 40);
+                break;
+            case MIDDLE:
+                driver.moveUntil(Direction.RIGHT, 0.7D, data -> data.getRightDistance() > 15);
+                break;
+            default:
+                break;
+        }
 
-        driver.move(Direction.BACKWARD, 0);
+             */
+
+        //Drive up to blocks
+        driver.moveUntil(Direction.BACKWARD, 0.3,
+            data -> data.getColorLeftDistance() <= 20 ||
+                    data.getColorRightDistance() <= 20);
 
         //pick up blocks
         map.getRightAuto().setPosition(0.0);
@@ -112,6 +130,10 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         driver.move(Direction.LEFT, 0.8, 9);
     }
 
+        /**
+         * Precondition: right is next to the wall.
+         * 77 cm
+         */
     protected void park() {
         //strafe left
         while(right.getDistance(DistanceUnit.CM) < 77){
@@ -121,7 +143,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         //park
         driver.move(Direction.FORWARD, 0.7, 40);
     }
-    protected void correctLocation() {
+    private void correctLocation() {
         //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
         driver.move(Direction.FORWARD, 0.7);
         DistanceSensor left = map.getDistanceLeft();
@@ -130,4 +152,5 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         }
         driver.stop();
     }
+
 }
