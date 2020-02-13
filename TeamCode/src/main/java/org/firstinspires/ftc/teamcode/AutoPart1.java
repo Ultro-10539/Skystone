@@ -17,6 +17,7 @@ public abstract class AutoPart1 extends AutoOpMode {
     protected SkystonePipeline pipeline;
     @Override
     public void setup(DeviceMap map) {
+
         map.setUpImu(hardwareMap);
         map.setUpMotors(hardwareMap);
         map.setupSensors(hardwareMap);
@@ -29,14 +30,13 @@ public abstract class AutoPart1 extends AutoOpMode {
 
         DeviceMap.getInstance().getCamera().startStreaming(pipeline.getRows(), pipeline.getCols());
 
-        map = DeviceMap.getInstance();
-
         left = map.getDistanceLeft();
         back = map.getDistanceBack();
         right = map.getDistanceRight();
 
         colorLeft = map.getSensorColorLeftDist();
         colorRight = map.getSensorColorRightDist();
+        this.map = map;
     }
 
 

@@ -99,6 +99,8 @@ public class DriveButtonOpMode extends DriveOpMode {
         updateTelemetry();
 
         buttons = this.setUpButtons(mapper);
+        mapper.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        mapper.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public List<Button> setUpButtons(DeviceMap mapper) {
