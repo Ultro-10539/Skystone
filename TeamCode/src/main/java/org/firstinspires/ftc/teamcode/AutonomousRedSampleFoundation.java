@@ -110,7 +110,7 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
             driver.move(Direction.RIGHT, 0.7);
         }
         driver.move(Direction.RIGHT, 0);
-        //park
+        //SecondSample
         driver.move(Direction.FORWARD, 0.7, 55);
     }
 
