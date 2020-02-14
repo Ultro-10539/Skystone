@@ -28,7 +28,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
 
         //Drives forwards a bit
-        driver.move(Direction.BACKWARD, 0.5, 21, true);
+        driver.move(Direction.BACKWARD, 0.5, 12, true);
         driver.stop();
     }
     protected void sampleFoundation() {
@@ -87,7 +87,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
     protected void afterPickUp() {
 
         //move forward and turn then drive to foundation then move back
-        driver.move(Direction.FORWARD, 0.3, 5.75);
+        driver.move(Direction.FORWARD, 0.3, 5);
         driver.turn(0.5, 83);
 
         //line up with wall
