@@ -67,6 +67,8 @@ public class DriveButtonOpMode extends DriveOpMode {
     private MecanumDriver driver;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+
+    private boolean liftOverride = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -166,16 +168,26 @@ public class DriveButtonOpMode extends DriveOpMode {
                             mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
                         }
                     }).build(),
-            builder.setGetter(() -> gamepad2.a)
+            builder.setGetter(() -> gamepad2.left_bumper)
                     .setbFunction(() -> {
-                        mapper.getArm1().setPosition(1);
-                        mapper.getArm2().setPosition(1);
+                        if(mapper.getArm1().getPosition() < 0.5){
+                            mapper.getArm1().setPosition(1);
+                            mapper.getArm2().setPosition(1);
+                        }else {
+                            mapper.getArm1().setPosition(0);
+                            mapper.getArm2().setPosition(0);
+                        }
+
                     }).build(),
-            builder.setGetter(() -> gamepad2.y)
+            builder.setGetter(()-> gamepad2.x)
                     .setbFunction(() -> {
-                        mapper.getArm1().setPosition(0);
-                        mapper.getArm2().setPosition(0);
-                }).build()
+                        if (!liftOverride){
+                            liftOverride = true;
+                        }else{
+                            liftOverride = false;
+                        }
+                    }).build()
+
             ));
         return buttons;
     }
@@ -223,32 +235,33 @@ public class DriveButtonOpMode extends DriveOpMode {
 
         //lift control
 
-        boolean liftOverride = false;
         if (gamepad2.back) {
-            liftOverride = true;
-        } else if (gamepad2.start) {
-            liftOverride = false;
+            map.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
 
         double liftPos = map.getLift().getCurrentPosition();
 
-        if (gamepad2.dpad_up && liftPos < 7050 && liftOverride == false) {
+        if (gamepad2.dpad_up && liftPos < 7050 && !liftOverride) {
             map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftPos > 100 && liftOverride == false) {
+        } else if (gamepad2.dpad_down && liftPos > 100 && !liftOverride) {
             map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             map.getLift().setPower(-1);
-        } else if (gamepad2.dpad_up && liftOverride == true) {
+        } else if (gamepad2.dpad_up && liftOverride) {
             map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftOverride == true) {
+        } else if (gamepad2.dpad_down && liftOverride) {
             map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             map.getLift().setPower(-1);
-        }else if (gamepad2.b){
+        }else if (gamepad2.a){
             map.getLift().setMode(DcMotor.RunMode.RUN_TO_POSITION);
             map.getLift().setTargetPosition(50);
             map.getLift().setPower(-1);
-        }else if (map.getLift().isBusy() != true){
+        }else if (gamepad2.y){
+            map.getLift().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            map.getLift().setTargetPosition(2000);
+            map.getLift().setPower(1);
+        }else if (!map.getLift().isBusy()){
             map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             map.getLift().setPower(0);
         }
