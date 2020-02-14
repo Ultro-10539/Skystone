@@ -36,6 +36,7 @@ public abstract class AutoPart1 extends AutoOpMode {
 
         colorLeft = map.getSensorColorLeftDist();
         colorRight = map.getSensorColorRightDist();
+
         this.map = map;
     }
 

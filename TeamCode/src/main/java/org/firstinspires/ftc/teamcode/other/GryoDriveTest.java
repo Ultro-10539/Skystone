@@ -21,6 +21,7 @@ public class GryoDriveTest extends AutoOpMode {
     public void setup(DeviceMap map) {
         map.setUpMotors(hardwareMap);
         map.setUpImu(hardwareMap);
+        map.initLynx(hardwareMap);
     }
 
     @Override
@@ -30,6 +31,6 @@ public class GryoDriveTest extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Direction.FORWARD, 0.5, 60, true);
+        driver.move(Direction.BACKWARD, 0.5, 40, true);
     }
 }

@@ -81,6 +81,7 @@ public class DriveButtonOpMode extends DriveOpMode {
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.setUpLEDs(hardwareMap);
+        mapper.initLynx(hardwareMap);
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters

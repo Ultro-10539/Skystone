@@ -415,6 +415,7 @@ public final class MecanumDriver implements IDriver {
     }
 
     public int[] getMotorCounts() {
+        map.clearBulkCache();
         int leftTop = map.getLeftTop().getCurrentPosition();
         int rightTop = map.getRightTop().getCurrentPosition();
         int leftBottom = map.getLeftBottom().getCurrentPosition();
