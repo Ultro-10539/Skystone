@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
+import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.skystone.SkystonePipeline;
@@ -24,6 +25,7 @@ public abstract class AutoPart1 extends AutoOpMode {
         map.setupServos(hardwareMap);
         map.setupOpenCV(hardwareMap);
         map.setUpLEDs(hardwareMap);
+        map.initLynx(hardwareMap);
 
         int orient = hardwareMap.appContext.getResources().getConfiguration().orientation;
         map.getCamera().setPipeline(pipeline = new SkystonePipeline(orient, 640, 480));
@@ -64,6 +66,22 @@ public abstract class AutoPart1 extends AutoOpMode {
                 driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_WHITE);
                 break;
         }
+    }
+
+
+    protected void forward() {
+
+        driver.stopAndReset();
+        //Prepares servo arms
+        map.getRightAuto().setPosition(0.3);
+        map.getRightFinger().setPosition(0.5);
+
+        map.getClaw().setPosition(1);
+
+
+        //Drives forwards a bit
+        driver.move(Direction.BACKWARD, 0.7, 21, true);
+        driver.stop();
     }
 
     protected Status skystone() {

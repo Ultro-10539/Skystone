@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -63,10 +64,13 @@ import java.util.List;
 @TeleOp(name="Driver Button op mode", group="Iterative Opmode")
 public class DriveButtonOpMode extends DriveOpMode {
     private List<Button> buttons;
+    private DcMotor lift;
 
     private MecanumDriver driver;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+
+    private boolean liftOverride = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -82,6 +86,9 @@ public class DriveButtonOpMode extends DriveOpMode {
         mapper.setupServos(hardwareMap);
         mapper.setUpLEDs(hardwareMap);
         mapper.initLynx(hardwareMap);
+
+        mapper.setBulkMode(LynxModule.BulkCachingMode.OFF);
+
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -99,9 +106,10 @@ public class DriveButtonOpMode extends DriveOpMode {
         addData("Status", "Initialized");
         updateTelemetry();
 
+        this.lift = mapper.getLift();
         buttons = this.setUpButtons(mapper);
-        mapper.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mapper.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public List<Button> setUpButtons(DeviceMap mapper) {
@@ -167,16 +175,27 @@ public class DriveButtonOpMode extends DriveOpMode {
                             mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
                         }
                     }).build(),
-            builder.setGetter(() -> gamepad2.a)
+            builder.setGetter(() -> gamepad2.left_bumper)
                     .setbFunction(() -> {
-                        mapper.getArm1().setPosition(1);
-                        mapper.getArm2().setPosition(1);
+                        if(mapper.getArm1().getPosition() < 0.5){
+                            mapper.getArm1().setPosition(1);
+                            mapper.getArm2().setPosition(1);
+                        } else {
+                            mapper.getArm1().setPosition(0);
+                            mapper.getArm2().setPosition(0);
+                        }
                     }).build(),
-            builder.setGetter(() -> gamepad2.y)
+            builder.setGetter(() -> gamepad2.x)
                     .setbFunction(() -> {
-                        mapper.getArm1().setPosition(0);
-                        mapper.getArm2().setPosition(0);
-                }).build()
+                        if(!liftOverride){
+                            liftOverride = true;
+                        } else {
+                            liftOverride = false;
+                        }
+                }).build(),
+            builder.setGetter(() -> gamepad2.b)
+                    .setbFunction(() -> lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER))
+                .build()
             ));
         return buttons;
     }
@@ -201,7 +220,7 @@ public class DriveButtonOpMode extends DriveOpMode {
      */
     @Override
     public void loop() {
-        DeviceMap map = DeviceMap.getInstance();
+        DeviceMap mapper = DeviceMap.getInstance();
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
         double right_stick_x = -gamepad1.right_stick_x;
@@ -209,54 +228,50 @@ public class DriveButtonOpMode extends DriveOpMode {
         if(color.equalsIgnoreCase("red"))
             driver.moveTrigRed(x / multiplier, y / multiplier, right_stick_x / multiplier);
         else driver.moveTrigBlue(x / multiplier, y / multiplier, right_stick_x / multiplier);
-        driver.intake(gamepad2.left_stick_y, gamepad2.right_stick_y);
+        driver.intake(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
         driver.conveyer(-gamepad2.right_trigger);
 
 
         if (gamepad1.right_trigger > 0) {
-            map.getFoundationLeft().setPosition(1);
-            map.getFoundationRight().setPosition(0);
+            mapper.getFoundationLeft().setPosition(1);
+            mapper.getFoundationRight().setPosition(0);
         } else {
-            map.getFoundationLeft().setPosition(0);
-            map.getFoundationRight().setPosition(1);
+            mapper.getFoundationLeft().setPosition(0);
+            mapper.getFoundationRight().setPosition(1);
 
         }
 
-        //lift control
 
-        boolean liftOverride = false;
-        if (gamepad2.back) {
-            liftOverride = true;
-        } else if (gamepad2.start) {
-            liftOverride = false;
-        }
+        double liftPos = lift.getCurrentPosition();
 
-        double liftPos = map.getLift().getCurrentPosition();
-
-        if (gamepad2.dpad_up && liftPos < 7050 && liftOverride == false) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftPos > 100 && liftOverride == false) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(-1);
-        } else if (gamepad2.dpad_up && liftOverride == true) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftOverride == true) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(-1);
-        }else if (gamepad2.b){
-            map.getLift().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            map.getLift().setTargetPosition(50);
-            map.getLift().setPower(-1);
-        }else if (map.getLift().isBusy() != true){
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(0);
+        if (gamepad2.dpad_up && liftPos < 7050 && !liftOverride) {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(1);
+        } else if (gamepad2.dpad_down && liftPos > 100 && !liftOverride ) {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(-1);
+        } else if (gamepad2.dpad_up && liftOverride) {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(1);
+        } else if (gamepad2.dpad_down && liftOverride) {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(-1);
+        }else if (gamepad2.a){
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            lift.setTargetPosition(50);
+            lift.setPower(-1);
+        }else if (gamepad2.y) {
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            lift.setTargetPosition(2000);
+            lift.setPower(1);
+        }else if (!lift.isBusy()){
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(0);
         }
 
         addData("lift: ", liftPos);
         addData("Overrride: ", liftOverride);
-        addData("Motor Status: ", map.getLift().getMode());
+        addData("Motor Status: ", lift.getMode());
         addData("trigger: ", gamepad2.left_trigger);
 
         for(Button button : buttons) button.press();

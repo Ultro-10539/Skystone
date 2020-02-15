@@ -450,4 +450,7 @@ public final class DeviceMap {
     public void clearBulkCache() {
         for(LynxModule module : modules) module.clearBulkCache();
     }
+    public void setBulkMode(LynxModule.BulkCachingMode mode) {
+        for(LynxModule module : modules) module.setBulkCachingMode(mode);
+    }
 }
