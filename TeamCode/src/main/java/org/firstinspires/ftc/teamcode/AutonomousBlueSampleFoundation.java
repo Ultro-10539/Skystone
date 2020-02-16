@@ -52,11 +52,11 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         driver.move(Direction.FORWARD, 0.7, 5);
         driver.turn(0.5, 83);
 
-//        //line up with wall
-//        while(back.getDistance(DistanceUnit.CM) > 16){
-//            driver.move(Direction.FORWARD, 0.7);
-//        }
-//        driver.move(Direction.FORWARD, 0);
+        //line up with wall
+        while(back.getDistance(DistanceUnit.CM) > 16){
+            driver.move(Direction.FORWARD, 0.7);
+        }
+        driver.move(Direction.FORWARD, 0);
 
         //drive to foundation
         //TODO: EACH CASE DIFFERENT

@@ -568,6 +568,58 @@ public final class MecanumDriver implements IDriver {
             map.getRightAuto().setPosition(posRight);
     }
 
+    public void prepareRight() {
+        final double
+            openAuto = 0.6,
+            openFinger = 0.5,
+            preparedFinger = 0.5,
+            preparedAuto = 0.3,
+            closeAuto = 0,
+            closeFinger = 0;
+        map.getRightAuto().setPosition(preparedFinger);
+        map.getRightFinger().setPosition(preparedFinger);
+    }
+
+    public void openRightArm() {
+        map.getRightAuto().setPosition(0.6);
+    }
+    public void openRightFinger() {
+        map.getRightFinger().setPosition(0.5);
+    }
+
+    public void closeRightArm() {
+        map.getRightAuto().setPosition(0);
+    }
+    public void closeRightFinger() {
+        map.getRightFinger().setPosition(0);
+    }
+
+    public void prepareLeft() {
+        final double openAuto = 0.2,
+        openFinger = 1,
+        preparedFinger = 0.6,
+        preparedAuto = 0.7,
+        closeAuto = 1,
+        closeFinger = 0.6;
+
+        map.getLeftFinger().setPosition(preparedFinger);
+        map.getLeftAuto().setPosition(preparedAuto);
+    }
+
+
+    public void openLeftArm() {
+        map.getLeftAuto().setPosition(0.6);
+    }
+    public void openLeftFinger() {
+        map.getLeftFinger().setPosition(0.6);
+    }
+
+    public void closeLeftArm() {
+        map.getLeftAuto().setPosition(1);
+    }
+    public void closeLeftFinger() {
+        map.getLeftFinger().setPosition(1);
+    }
 
     @Override
     public void stop() {

@@ -7,8 +7,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
-@Autonomous(name = "AutonomousDoubleBlueSample")
-public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
+@Autonomous(name = "AutonomousDoubleRedSample")
+public class AutonomousDoubleRedSample extends AutoPart1 {
     @Override
     public void run() {
         forward();
@@ -17,11 +17,12 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         secondSample();
     }
 
-    @Override
+
+
     public void firstSample() {
         //move forward and turn then drive to foundation then move back
         driver.move(Direction.FORWARD, 0.3, 5);
-        driver.turn(0.5, 83);
+        driver.turn(0.5, -83);
 
         //line up with wall
         while(back.getDistance(DistanceUnit.CM) > 16){
@@ -30,7 +31,7 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         driver.move(Direction.FORWARD, 0);
 
         //drive to foundation
-        if (pos == Status.LEFT_CORNER){
+        if (pos == Status.RIGHT_CORNER){
             driver.move(Direction.BACKWARD, 0.9, 60, true);
         } else if(pos == Status.MIDDLE){
             driver.move(Direction.BACKWARD, 0.9, 68, true);
@@ -39,43 +40,51 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         }
 
         //drop stone
-        map.getRightFinger().setPosition(0.5);
+        driver.openLeftFinger();
         sleep(750);
-        map.getRightFinger().setPosition(0.0);
+        driver.closeLeftFinger();
 
         driver.move(Direction.FORWARD, 0.8, 44, true);
 
 
         //dr
     }
+    protected void sampleFoundation() {
+        //Line up with correct block
+        if (pos == Status.RIGHT_CORNER){
+            driver.move(Direction.RIGHT, 0.7, 8);
+        } else if(pos == Status.MIDDLE){
+            driver.move(Direction.RIGHT, 0.7, 14.5);
+        } else {
+            while(left.getDistance(DistanceUnit.CM) > 5){
+                driver.move(Direction.RIGHT, 0.5);
+            }
+            driver.stop();
+        }
 
-    @Override
+        //Drive up to blocks
+        while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)){
+            driver.move(Direction.BACKWARD, 0.4);
+        }
+        driver.stop();
+
+        //pick up blocks
+        driver.closeLeftArm();
+        driver.closeLeftFinger();
+        sleep(500);
+        driver.openLeftArm();
+        sleep(500);
+
+
+    }
+
     public void secondSample() {
-        driver.turn(0.55, -83);
-        Servo auto, finger;
-        double openAuto, openFinger,
-                closeAuto, closeFinger,
-                preparedAuto, preparedFinger;
-
+        driver.turn(0.55, 83);
         Runnable prepareAction, pickUpAction, dropAction;
         //CLOSE = GRAB
         //OPEN = UNGRAB
         switch (pos) {
-            case RIGHT_CORNER:
-                prepareAction = driver::prepareRight;
-
-                pickUpAction = () -> {
-                    driver.closeRightArm();
-                    driver.closeRightFinger();
-                    sleep(500);
-                    driver.openRightArm();
-                };
-                dropAction = driver::openRightFinger;
-                break;
             case LEFT_CORNER:
-                driver.move(Direction.RIGHT, 0.7, 7);
-            case MIDDLE:
-            default:
                 prepareAction = driver::prepareLeft;
 
 
@@ -87,6 +96,21 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
                 };
 
                 dropAction = driver::openLeftFinger;
+
+                break;
+            case RIGHT_CORNER:
+                driver.move(Direction.LEFT, 0.7, 7);
+            case MIDDLE:
+            default:
+                prepareAction = driver::prepareRight;
+
+                pickUpAction = () -> {
+                    driver.closeRightArm();
+                    driver.closeRightFinger();
+                    sleep(500);
+                    driver.openRightArm();
+                };
+                dropAction = driver::openRightFinger;
                 break;
         }
 
@@ -107,7 +131,7 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         driver.move(Direction.BACKWARD, 0.9, 55, true);
 
         dropAction.run();
-        sleep(500);
+        sleep(250);
 
         //park
         driver.move(Direction.FORWARD, 0.8, 35, true);
