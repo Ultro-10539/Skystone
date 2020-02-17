@@ -69,7 +69,7 @@ public abstract class AutoPart1 extends AutoOpMode {
     }
 
 
-    protected void forward() {
+    protected void forwardBlue() {
 
         driver.stopAndReset();
         //Prepares servo arms

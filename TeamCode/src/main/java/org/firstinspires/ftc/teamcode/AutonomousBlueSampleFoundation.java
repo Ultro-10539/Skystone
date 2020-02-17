@@ -7,11 +7,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
-@Autonomous(name = "AutonomousBlueSampleFoundation")
+@Autonomous(name = "AutonomousBlueSampleFoundation NOTIMER")
 public class AutonomousBlueSampleFoundation extends AutoPart1 {
     @Override
     public void run() {
-        forward();
+        forwardBlue();
         sampleFoundation();
         firstSample();
         secondSample();
@@ -43,12 +43,11 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         map.getRightAuto().setPosition(0.6);
         sleep(500);
 
-
     }
 
     protected void firstSample() {
 
-        //move forward and turn then drive to foundation then move back
+        //move forwardBlue and turn then drive to foundation then move back
         driver.move(Direction.FORWARD, 0.7, 5);
         driver.turn(0.5, 83);
 

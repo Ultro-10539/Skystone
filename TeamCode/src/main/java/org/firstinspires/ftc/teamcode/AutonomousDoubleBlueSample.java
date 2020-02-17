@@ -5,13 +5,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "AutonomousDoubleBlueSample")
 public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
     @Override
     public void run() {
-        forward();
+        map.getRightAuto().setPosition(0.6);
+        map.getRightFinger().setPosition(0.0);
+        forwardBlue();
         sampleFoundation();
         firstSample();
         secondSample();
@@ -19,9 +22,10 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
 
     @Override
     public void firstSample() {
-        //move forward and turn then drive to foundation then move back
+        //move forwardBlue and turn then drive to foundation then move back
         driver.move(Direction.FORWARD, 0.3, 5);
         driver.turn(0.5, 83);
+
 
 //        //line up with wall
 //        while(back.getDistance(DistanceUnit.CM) > 16){
@@ -43,51 +47,27 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         sleep(750);
         map.getRightFinger().setPosition(0.0);
 
-        driver.move(Direction.FORWARD, 0.8, 44, true);
-
 
         //dr
     }
 
     @Override
     public void secondSample() {
-        driver.turn(0.55, -83);
-        Servo auto, finger;
-        double openAuto, openFinger,
-                closeAuto, closeFinger,
-                preparedAuto, preparedFinger;
 
-        //CLOSE = GRAB
-        //OPEN = UNGRAB
-        switch (pos) {
-            case LEFT_CORNER:
-                auto = map.getLeftAuto();
-                finger = map.getLeftFinger();
-                openAuto = 1;
-                openFinger = 1;
-                preparedFinger = 0.5;
-                preparedAuto = 0.3;
-                closeAuto = 0;
-                closeFinger = 0;
-                break;
-            case RIGHT_CORNER:
-                driver.move(Direction.LEFT, 0.7, 7);
-            case MIDDLE:
-            default:
-                auto = map.getRightAuto();
-                finger = map.getRightFinger();
-                openAuto = 0;
-                openFinger = 0;
-                preparedFinger = 0.5;
-                preparedAuto = 0.3;
-                closeAuto = 0.6;
-                closeFinger = 1;
-                break;
+        //drive to next stpne
+        if (pos == Status.LEFT_CORNER){
+            driver.move(Direction.FORWARD, 0.8, 36, true);
+        } else if(pos == Status.MIDDLE){ ;
+            driver.move(Direction.FORWARD, 0.8, 44, true);
+        } else {
+            driver.move(Direction.FORWARD, 0.8, 58, true);
         }
 
+        map.getRightAuto().setPosition(0.3);
+        map.getRightFinger().setPosition(0.5);
 
-        auto.setPosition(preparedAuto);
-        finger.setPosition(preparedFinger);
+        driver.turn(0.5, -83);
+
 
         //Drive up to blocks
         while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)){
@@ -95,22 +75,32 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         }
         driver.move(Direction.BACKWARD, 0);
 
-        auto.setPosition(closeAuto);
-        finger.setPosition(closeFinger);
+        //pick up blocks
+        map.getRightAuto().setPosition(0.0);
+        map.getRightFinger().setPosition(0.0);
         sleep(500);
-        auto.setPosition(openAuto);
+        map.getRightAuto().setPosition(0.6);
+        sleep(500);
 
         driver.move(Direction.FORWARD, 0.9, 4);
-        driver.turn(0.5, -83);
+        driver.turn(0.5, 83);
 
-        driver.move(Direction.BACKWARD, 0.9, 55, true);
+        if (pos == Status.LEFT_CORNER){
+            driver.move(Direction.BACKWARD, 0.8, 36, true);
+        } else if(pos == Status.MIDDLE){ ;
+            driver.move(Direction.BACKWARD, 0.8, 44, true);
+        } else {
+            driver.move(Direction.BACKWARD, 0.8, 52, true);
+        }
 
-        auto.setPosition(openAuto);
-        finger.setPosition(openFinger);
-        sleep(500);
+        //drop stone
+        map.getRightFinger().setPosition(0.5);
+        sleep(750);
+        map.getRightFinger().setPosition(0.0);
 
-        driver.move(Direction.FORWARD, 0.8, 35, true);
-
+        driver.move(Direction.FORWARD, 0.8, 19, true);
+        map.getRightFinger().setPosition(0.5);
+        map.getRightAuto().setPosition(0);
 
 
     }

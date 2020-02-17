@@ -75,6 +75,7 @@ public class DriveButtonOpMode extends DriveOpMode {
      * Code to run ONCE when the driver hits INIT
      */
     public String color = "red";
+
     @Override
     public void init() {
         DeviceMap mapper = DeviceMap.getInstance(hardwareMap);
@@ -95,7 +96,7 @@ public class DriveButtonOpMode extends DriveOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
 
-        // Most robots need the motor on one side to be reversed to drive forward
+        // Most robots need the motor on one side to be reversed to drive forwardBlue
         // Reverse the motor that runs backwards when connected directly to the battery
 
         // Tell the driver that initialization is complete.
@@ -213,6 +214,8 @@ public class DriveButtonOpMode extends DriveOpMode {
     @Override
     public void start() {
         runtime.reset();
+        DeviceMap.getInstance().getRightAuto().setPosition(0.6);
+        DeviceMap.getInstance().getRightFinger().setPosition(0.0);
     }
 
     /*
