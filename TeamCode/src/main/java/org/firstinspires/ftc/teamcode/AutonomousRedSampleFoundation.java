@@ -15,19 +15,6 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         sampleFoundation();
         afterPickUp();
     }
-
-    private void forward() {
-
-        driver.stopAndReset();
-        //Prepares servo arms
-        map.getLeftAuto().setPosition(0.9);
-        map.getLeftFinger().setPosition(0.6);
-
-
-        //Drives forwards a bit
-        driver.move(Direction.BACKWARD, 0.5, 21, true);
-        driver.stop();
-    }
     public void sampleFoundation() {
         //Strafes to line up with wall
         while(left.getDistance(DistanceUnit.CM) > 7){
@@ -110,7 +97,6 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
             driver.move(Direction.RIGHT, 0.7);
         }
         driver.move(Direction.RIGHT, 0);
-        //SecondSample
         driver.move(Direction.FORWARD, 0.7, 55);
     }
 

@@ -4,9 +4,11 @@ import android.content.Context;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -26,6 +28,8 @@ import org.openftc.revextensions2.ExpansionHubMotor;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import java.util.List;
 //import java.util.concurrent.CompletableFuture;
 
 
@@ -65,6 +69,8 @@ public final class DeviceMap {
     private DistanceSensor distanceRight, distanceBack, distanceLeft, sensorColorLeftDist, sensorColorRightDist;
     private DistanceSensor[] distanceSensors;
 
+    private List<LynxModule> modules;
+
     public DeviceMap(final HardwareMap map) {
         //for later
 
@@ -83,6 +89,7 @@ public final class DeviceMap {
         setupServos(map); //init servos
         setupSensors(map); //init d-sensors, color-sensors
         setUpLEDs(map);
+        initLynx(map);
     }
 
     public void setUpExpansionHub(HardwareMap map) {
@@ -97,17 +104,17 @@ public final class DeviceMap {
         //return CompletableFuture.runAsync(() -> {
             telemetry.addLine("Setting up driveMotors");
             telemetry.update();
-            leftTop = map.get(ExpansionHubMotor.class, "LeftTop");
-            leftBottom = map.get(ExpansionHubMotor.class, "LeftBottom");
-            rightTop = map.get(ExpansionHubMotor.class, "RightTop");
-            rightBottom = map.get(ExpansionHubMotor.class, "RightBottom");
+            leftTop = map.get(DcMotorEx.class, "LeftTop");
+            leftBottom = map.get(DcMotorEx.class, "LeftBottom");
+            rightTop = map.get(DcMotorEx.class, "RightTop");
+            rightBottom = map.get(DcMotorEx.class, "RightBottom");
 
 
-            leftIntake = map.get(ExpansionHubMotor.class, "leftIntake");
-            rightIntake = map.get(ExpansionHubMotor.class, "rightIntake");
+            leftIntake = map.get(DcMotorEx.class, "leftIntake");
+            rightIntake = map.get(DcMotorEx.class, "rightIntake");
 
-            conveyer = map.get(ExpansionHubMotor.class, "conveyor");
-            lift = map.get(ExpansionHubMotor.class, "lift");
+            conveyer = map.get(DcMotorEx.class, "conveyor");
+            lift = map.get(DcMotorEx.class, "lift");
 
             this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
             this.intakeMotors = new DcMotor[] {
@@ -251,6 +258,13 @@ public final class DeviceMap {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_STONE, LABEL_SKYSTONE);
         tfod.activate();
+    }
+
+    public void initLynx(HardwareMap hardwareMap) {
+        this.modules = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule module : modules) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
     }
 
     public void deactivateOpenCV() {
@@ -431,5 +445,12 @@ public final class DeviceMap {
 
     public RevBlinkinLedDriver getLedDriver() {
         return ledDriver;
+    }
+
+    public void clearBulkCache() {
+        for(LynxModule module : modules) module.clearBulkCache();
+    }
+    public void setBulkMode(LynxModule.BulkCachingMode mode) {
+        for(LynxModule module : modules) module.setBulkCachingMode(mode);
     }
 }
