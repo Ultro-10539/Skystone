@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import net.jafama.FastMath;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.function.Predicate;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.monitor.RobotData;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
@@ -16,6 +19,7 @@ import org.firstinspires.ftc.teamcode.threading.control.DriveThread;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public final class MecanumDriver implements IDriver {
     private static final double TURN_OFFSET = 2.5F;
@@ -38,6 +42,46 @@ public final class MecanumDriver implements IDriver {
         this.test = true;
     }
 
+    public class Data {
+        public DistanceSensor left, back, right, colorLeft, colorRight;
+        public UltroImu imu;
+
+        private Data() {
+            left = map.getDistanceLeft();
+            back = map.getDistanceBack();
+            right = map.getDistanceRight();
+
+            colorLeft = map.getSensorColorLeftDist();
+            colorRight = map.getSensorColorRightDist();
+
+            this.imu = Threader.get(UltroImu.class);
+        }
+
+        public double getLeftDistance() {
+            return left.getDistance(DistanceUnit.CM);
+        }
+
+        public double getBackDistance() {
+            return back.getDistance(DistanceUnit.CM);
+        }
+
+        public double getRightDistance() {
+            return right.getDistance(DistanceUnit.CM);
+        }
+
+        public double getColorLeftDistance() {
+            return colorLeft.getDistance(DistanceUnit.CM);
+        }
+
+        public double getColorRightDistance() {
+            return colorRight.getDistance(DistanceUnit.CM);
+        }
+
+        public double getAngle() {
+            return imu.getAngle();
+        }
+    }
+
     public void append(Direction direction, double power) {
         DcMotor leftTop = map.getLeftTop();
         DcMotor rightTop = map.getRightTop();
@@ -50,6 +94,26 @@ public final class MecanumDriver implements IDriver {
         rightBottom.setPower(rightBottom.getPower() + direction.getRightBottom() * power);
     }
 
+    /**
+     * Move until a specified condition is reached
+     * @param direction
+     * @param power
+     * @param dataPredicate if this returns true, then the robot will stop.
+     *                      The data class has all the sensors necessary to make easy access of sensors possible.
+     */
+    public void moveUntil(Direction direction, double power, Predicate<Data> dataPredicate) {
+        move(direction, power);
+        Data data = new Data();
+        //it is with an exclamation point for human readable logic
+        final long TIMEOUT = 5000L;
+        final long startTime = System.currentTimeMillis();
+        while(!dataPredicate.test(data)) {
+            long deltaTime = System.currentTimeMillis() - startTime;
+            if(deltaTime > TIMEOUT)
+                break;
+        }
+        stop();
+    }
     /**
      * Drive until a conditional is true
      * @param direction

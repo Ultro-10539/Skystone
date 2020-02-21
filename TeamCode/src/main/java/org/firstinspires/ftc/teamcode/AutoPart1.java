@@ -63,7 +63,7 @@ public abstract class AutoPart1 extends AutoOpMode {
                 driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
                 break;
             default:
-                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_WHITE);
+                driver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_END_TO_END_BLEND_TO_BLACK);
                 break;
         }
     }

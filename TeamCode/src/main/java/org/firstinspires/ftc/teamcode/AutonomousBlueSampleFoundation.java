@@ -35,7 +35,6 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
             driver.move(Direction.BACKWARD, 0.4);
         }
         driver.move(Direction.BACKWARD, 0);
-
         //pick up blocks
         map.getRightAuto().setPosition(0.0);
         map.getRightFinger().setPosition(0.0);
@@ -164,7 +163,8 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
         driver.move(Direction.LEFT, 1.0, 48);
     }
-    protected void correctLocation() {
+
+    private void correctLocation() {
         //driver.move(Direction.FORWARD, 0.7, RobotData.distBack - 115, true);
         driver.move(Direction.FORWARD, 0.7);
         DistanceSensor left = map.getDistanceLeft();
@@ -173,4 +173,5 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         }
         driver.stop();
     }
+
 }
