@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.monitor.RobotData;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.threading.Threader;
+import org.firstinspires.ftc.teamcode.threading.control.DriveThread;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.Arrays;
@@ -135,10 +136,11 @@ public final class MecanumDriver implements IDriver {
     }
 
     public void move(Direction direction, double leftTop, double rightTop, double leftBottom, double rightBottom) {
-        map.getLeftTop().setPower(direction.getLeftTop() * leftTop);
-        map.getRightBottom().setPower(direction.getRightBottom() * rightBottom);
-        map.getRightTop().setPower(direction.getRightTop() * rightTop);
-        map.getLeftBottom().setPower(direction.getLeftBottom() * leftBottom);
+        getDriveThread().setPowers(
+            direction.getLeftTop() * leftTop,
+            direction.getRightTop() * rightTop,
+            direction.getLeftBottom() * leftBottom,
+            direction.getRightBottom() * rightBottom);
     }
 
     @Override
@@ -623,8 +625,7 @@ public final class MecanumDriver implements IDriver {
 
     @Override
     public void stop() {
-        for(DcMotor motor : map.getDriveMotors())
-            motor.setPower(0);
+        getDriveThread().setPowers(0, 0, 0, 0);
     }
 
     public void setTelemetry(Telemetry telemetry) {
@@ -656,5 +657,10 @@ public final class MecanumDriver implements IDriver {
     }
     public void updateTelemetry() {
         if(test) telemetry.update();
+    }
+
+
+    private DriveThread getDriveThread() {
+        return Threader.get(DriveThread.class);
     }
 }

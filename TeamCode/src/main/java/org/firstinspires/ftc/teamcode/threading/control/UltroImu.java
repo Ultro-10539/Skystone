@@ -12,8 +12,9 @@ import org.firstinspires.ftc.teamcode.threading.UltroThread;
 public class UltroImu extends UltroThread {
     private BNO055IMU imu;
 
+
     private Orientation lastAngles;
-    private double globalAngle;
+    private volatile double globalAngle;
     private double roll = 0, pitch = 0, yaw = 0;
 
     public UltroImu() {
@@ -41,16 +42,20 @@ public class UltroImu extends UltroThread {
     private void updateAngles2() {
         Orientation angles = getOrientation();
 
+
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
         if (deltaAngle < -180)
             deltaAngle += 360;
         else if (deltaAngle > 180)
             deltaAngle -= 360;
-
-        globalAngle += deltaAngle;
+        incrementGlobalAngle(deltaAngle);
 
         lastAngles = angles;
+    }
+
+    private synchronized void incrementGlobalAngle(double deltaAngle) {
+        globalAngle = globalAngle + deltaAngle;
     }
 
     @Override

@@ -23,8 +23,6 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcontroller.ultro.listener.UltroVuforia;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.revextensions2.ExpansionHubEx;
-import org.openftc.revextensions2.ExpansionHubMotor;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -41,8 +39,6 @@ public final class DeviceMap {
     private static DeviceMap INSTANCE;
     private Telemetry telemetry;
     private OpMode currentOpMode;
-
-    private ExpansionHubEx expansionHub3, expansionHub2;
 
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
             leftIntake, rightIntake, conveyer, lift;
@@ -75,13 +71,11 @@ public final class DeviceMap {
         //for later
 
         INSTANCE = this;
-        setUpExpansionHub(map);
         //CompletableFuture.allOf(
         //).thenRunAsync(() -> {
         //}, service);
     }
     public void setupAll(HardwareMap map) {
-        setUpExpansionHub(map);
         setUpMotors(map); //init motors
         setUpImu(map); //init imu
         setUpVuforia(map); //init vuforia
@@ -92,10 +86,6 @@ public final class DeviceMap {
         initLynx(map);
     }
 
-    public void setUpExpansionHub(HardwareMap map) {
-        this.expansionHub3 = map.get(ExpansionHubEx.class, "Expansion Hub 3");
-        this.expansionHub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
-    }
     /**
      * This will just set up all the driveMotors
      * @param map
@@ -283,12 +273,6 @@ public final class DeviceMap {
     }
     public void deactivateLedDriver() {
         ledDriver.close();
-    }
-    public ExpansionHubEx getExpansionHub3() {
-        return expansionHub3;
-    }
-    public ExpansionHubEx getExpansionHub2() {
-        return expansionHub2;
     }
 
     //The methods below get all the driveMotors

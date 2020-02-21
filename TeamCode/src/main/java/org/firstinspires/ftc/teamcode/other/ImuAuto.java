@@ -23,7 +23,6 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void setup(DeviceMap map) {
-        map.setUpExpansionHub(hardwareMap);
         map.setUpImu(hardwareMap);
         map.setUpMotors(hardwareMap);
         telemetry.addData("Setted up imu!", "ready to go!");
