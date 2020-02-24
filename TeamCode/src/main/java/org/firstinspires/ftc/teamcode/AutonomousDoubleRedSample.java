@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
-import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "AutonomousDoubleRedSample")
@@ -14,7 +13,7 @@ public class AutonomousDoubleRedSample extends AutonomousRedSampleFoundation {
         map.getRightAuto().setPosition(0.6);
         map.getRightFinger().setPosition(0.0);
         forwardRed();
-        sampleFoundation();
+        sampleStone();
         firstSample();
         secondSample();
     }

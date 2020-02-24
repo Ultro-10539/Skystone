@@ -15,23 +15,23 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         map.getRightAuto().setPosition(0.6);
         map.getRightFinger().setPosition(0.0);
         forwardBlue();
-        sampleFoundation();
+//        sampleFoundation();
         firstSample();
         secondSample();
     }
 
-    @Override
+//    @Override
     public void firstSample() {
         //move forwardBlue and turn then drive to foundation then move back
         driver.move(Direction.FORWARD, 0.3, 5);
         driver.turn(0.5, 83);
-
 
 //        //line up with wall
 //        while(back.getDistance(DistanceUnit.CM) > 16){
 //            driver.move(Direction.FORWARD, 0.4);
 //        }
 //        driver.move(Direction.FORWARD, 0);
+
 
         //drive to foundation
         if (pos == Status.LEFT_CORNER){
@@ -82,9 +82,6 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         map.getRightAuto().setPosition(0.6);
         sleep(500);
 
-        driver.move(Direction.FORWARD, 0.9, 4);
-        driver.turn(0.5, 83);
-
         if (pos == Status.LEFT_CORNER){
             driver.move(Direction.BACKWARD, 0.8, 36, true);
         } else if(pos == Status.MIDDLE){ ;
@@ -97,6 +94,7 @@ public class AutonomousDoubleBlueSample extends AutonomousBlueSampleFoundation {
         map.getRightFinger().setPosition(0.5);
         sleep(750);
         map.getRightFinger().setPosition(0.0);
+
 
         driver.move(Direction.FORWARD, 0.8, 19, true);
         map.getRightFinger().setPosition(0.5);
