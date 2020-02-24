@@ -57,10 +57,6 @@ public final class MecanumDriver implements IDriver {
      * @param gyroAssist
      */
     public void moveCond(Direction direction, double power, boolean conditional, boolean gyroAssist){
-        for(DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
         double angle = 0, initialAngle = 0;
         if(gyroAssist) {
             UltroImu imu = Threader.get(UltroImu.class);
@@ -69,51 +65,16 @@ public final class MecanumDriver implements IDriver {
             initialAngle = angle;
         }
         LinearOpMode linear = null;
-        if(map.getCurrentOpMode() instanceof AutoOpMode) {
-            linear = (LinearOpMode) map.getCurrentOpMode();
-            if(linear == null) return;
-        }
 
-        if(direction == Direction.LEFT){
-            map.getLeftTop().setPower(-power);
-            map.getRightTop().setPower(power);
-            map.getLeftBottom().setPower(power);
-            map.getRightBottom().setPower(-power);
-        } else if(direction == Direction.RIGHT){
-            map.getLeftTop().setPower(power);
-            map.getRightTop().setPower(-power);
-            map.getLeftBottom().setPower(-power);
-            map.getRightBottom().setPower(power);
-        } else {
+        while (linear.opModeIsActive() && conditional){
             move(direction, power);
+            if (gyroAssist){
+                gyroAssistor(direction, initialAngle, angle, power);
+                UltroImu imu = Threader.get(UltroImu.class);
+                angle = imu.getAngle();
+            }
         }
-        //statement is an if because it is already placed inside of a while loop
-//        if(!conditional) {
-//            addData("moving to position", conditional);
-//            updateTelemetry();
-//            if ((gyroAssist && (direction == Direction.FORWARD)) || (gyroAssist && (direction == Direction.BACKWARD))){
-//                double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
-//                addData("initial angle", initialAngle);
-//                addData("angle", angle);
-//                addData("power", power);
-//                if (angle > initialAngle + 2) {
-//                    addData("Increasing right side", correctedPower);
-//                    gyroAssist(direction.getRightSide(), power + 0.1);
-//                    gyroAssist(direction.getLeftSide(), correctedPower);
-//                } else if(angle < initialAngle - 2) {
-//                    addData("Increasing left side", correctedPower);
-//                    gyroAssist(direction.getLeftSide(), power + 0.1);
-//                    gyroAssist(direction.getRightSide(), correctedPower);
-//                }else {
-//                    addData("normal", "side");
-//                    move(direction, power);
-//                }
-//                updateTelemetry();
-//
-//                UltroImu imu = Threader.get(UltroImu.class);
-//                angle = imu.getAngle();
-//            }
-//        }
+        move(direction, 0);
     }
 
     public void stopAndReset(){
