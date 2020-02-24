@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 
-@Autonomous(name = "AutonomousBlueSampleFoundation")
+@Autonomous(name = "🔵AutonomousBlueSampleFoundation")
 public class AutonomousBlueDoubleSampleFoundation extends AutoPart1 {
     @Override
     public void run() {

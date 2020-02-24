@@ -25,7 +25,8 @@ public class testingOpmode extends AutoPart1 {
     private void testMethod() {
 
         driver.stopAndReset();
-        driver.moveUntil(Direction.FORWARD, 0.3, data -> data.getBackDistance() < 16);
+        driver.moveUntil(Direction.FORWARD, 0.3, data -> data.getBackDistance() < 20, true);
+        addData("val", map.getDistanceBack().getDistance(DistanceUnit.CM));
     }
 
 
