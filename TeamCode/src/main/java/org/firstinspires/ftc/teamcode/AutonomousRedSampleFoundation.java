@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "🔴AutonomousRedSampleFoundation NOTIMER")
 public class AutonomousRedSampleFoundation extends AutoPart1 {
@@ -12,8 +13,8 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
     public void run() {
         forwardRed();
         sampleStone();
-        firstSample();
-        secondSample();
+//        firstSample();
+//        secondSample();
 
 //        foundation();
     }
@@ -31,8 +32,7 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
     }
 
     protected void sampleStone() {
-        //Prepares servos and lines up with correct block
-        //Prepares servo arms based on detected block
+
         switch(pos){
             case LEFT_CORNER:
                 //prepares left arm
@@ -60,7 +60,7 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
                 //closes left arm
                 map.getLeftAuto().setPosition(0.6);
                 map.getLeftFinger().setPosition(1.0);
-
+                break;
             default:
                 //prepares left arm
                 map.getLeftAuto().setPosition(1.0);
@@ -71,13 +71,9 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
                 map.getRightFinger().setPosition(0.0);
                 break;
         }
-
+        sleep(1000);
         //Drive up to blocks
-        driver.moveCond(Direction.BACKWARD, 0.4, !(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20), true);
-//        while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)){
-//            driver.move(Direction.BACKWARD, 0.4);
-//        }
-//        driver.move(Direction.BACKWARD, 0);
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
 
         //pick up blocks
         switch(pos){
@@ -114,12 +110,13 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
 
                 break;
         }
+        sleep(1000);
+        driver.move(Direction.FORWARD, 0.3, 5);
     }
 
     private void firstSample() {
         //move forward 5 inches and turn facing towards foundation
-        driver.move(Direction.FORWARD, 0.3, 5);
-        driver.turn(0.5, 83);
+        driver.turn(0.5, 83.5);
 
         //drive until 120cm away from other wall
         //TODO: may need to adjust distance value
