@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 
-@Autonomous(name = "🔴DoubleSampleFoundation")
-public class AutonomousRedSampleFoundation extends AutoPart1 {
+@Autonomous(name = "🔴SampleFirstFoundation")
+public class AutonomousRedSampleFoundationAlt extends AutoPart1 {
     @Override
     public void run() {
         forwardRed();
         sampleStone();
         firstSample();
-//        secondSample();
-//        foundation();
+        secondSample();
+        foundation();
     }
 
 
@@ -136,30 +136,20 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         driver.move(Direction.BACKWARD, 0.3, 9, true);
 
         //grab foundation and drop stone
-        map.getFoundationLeft().setPosition(1);
-        map.getFoundationRight().setPosition(0);
+
         map.getLeftFinger().setPosition(0.6);
         map.getRightFinger().setPosition(0.5);
-        sleep(1000);
+        driver.move(Direction.FORWARD, 0.3, 9, true);
         map.getLeftFinger().setPosition(1.0);
         map.getRightFinger().setPosition(0.0);
-        //push foundation into correct position
-        driver.move(Direction.FORWARD, 0.9, 8, true);
-        driver.turn(0.7, -74);
-        map.getFoundationLeft().setPosition(0);
-        map.getFoundationRight().setPosition(1);
-        driver.move(Direction.LEFT, 0.7, 5, false);
-        driver.move(Direction.FORWARD, 0.9, 80, true);
     }
 
     protected void secondSample() {
-        //TODO: change distance value so that robot is properly aligned to pick up right/middle
-        driver.moveUntil(Direction.FORWARD, 0.4, data -> data.getBackDistance() <= 120);
+        driver.turn(0.3, -80);
+        //TODO: change distance value so that robot is properly aligned to pick up left/middle
+        driver.move(Direction.FORWARD, 0.9, 92, true);
 
-        //faces stones
-        driver.turn(0.5, -83);
-
-        //prepares stones
+        //Set up with correct block
         switch(pos){
             case LEFT_CORNER:
                 //prepares left arm
@@ -198,8 +188,8 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
                 map.getRightFinger().setPosition(0.0);
                 break;
         }
-
-        //samples stones
+        driver.turn(0.5, 83);
+        //Directions are switched because robot is oriented differently on blue than on red
         sampleStone();
         driver.turn(0.7, -76);
         //line up with wall
@@ -209,16 +199,33 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
     protected void foundation(){
         //Drives toward foundation
         driver.move(Direction.BACKWARD, 0.9, 100, true);
-        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
+
+        //face foundation
+        driver.turn(0.7, 75);
+
+        //line up with foundation
+        driver.move(Direction.BACKWARD, 0.3, 10, false);
+
         //grab foundation and drop stone
         map.getLeftFinger().setPosition(0.6);
         map.getRightFinger().setPosition(0.5);
+        driver.move(Direction.RIGHT, 0.7, 4, false);
+        map.getFoundationLeft().setPosition(1);
+        map.getFoundationRight().setPosition(0);
         sleep(1000);
         map.getLeftFinger().setPosition(1.0);
         map.getRightFinger().setPosition(0.0);
-        //push foundation into correct position and park
+        //push foundation into correct position
+        driver.turn(0.7, -74);
+        map.getFoundationLeft().setPosition(0);
+        map.getFoundationRight().setPosition(1);
         driver.move(Direction.BACKWARD, 0.9, 10, true);
         driver.move(Direction.FORWARD, 0.9, 45, true);
+//
+//        //park
+//        driver.move(Direction.FORWARD, 0.7, 30, true);
+//        map.getRightFinger().setPosition(0.5);
+//        map.getRightAuto().setPosition(0);
     }
 
     private void correctLocation() {
