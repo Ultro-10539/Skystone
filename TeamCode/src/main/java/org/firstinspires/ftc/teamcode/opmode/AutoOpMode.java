@@ -68,7 +68,7 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
         mapper.setCurrentOpMode(this);
         mapper.setTelemetry(telemetry);
         setup(mapper);
-        Threader.registerThreads();
+        Threader.registerAuto();
 
         driver = new MecanumDriver();
         driver.setTelemetry(telemetry);
@@ -98,6 +98,8 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
     @Override
     public void runOpMode() {
         preInit();
+
+        driver.stopAndReset();
         // Wait for the game to start (driver presses PLAY)
         while(!isStarted())
             beforeLoop();

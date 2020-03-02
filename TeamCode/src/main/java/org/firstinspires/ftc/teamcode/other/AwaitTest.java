@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.other;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.util.RobotLog;
 
+import net.jafama.FastMath;
+
+import org.firstinspires.ftc.teamcode.drive.Vector;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 
 @Autonomous(name="GyroDrive Test", group="Linear Opmode")
-public class GryoDriveTest extends AutoOpMode {
+public class AwaitTest extends AutoOpMode {
     @Override
     public void preInit() {
         super.preInit();
@@ -19,7 +23,7 @@ public class GryoDriveTest extends AutoOpMode {
 
     @Override
     public void setup(DeviceMap map) {
-        map.setUpMotors(hardwareMap);
+        map.setUpDriveMotors(hardwareMap);
         map.setUpImu(hardwareMap);
         map.initLynx(hardwareMap);
     }
@@ -31,6 +35,26 @@ public class GryoDriveTest extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Direction.BACKWARD, 0.5, 40, true);
+
+        final double dist = 2;
+        for(int i = 0; i <= 360; i += 30) {
+            double angleRadians = Math.toRadians(i);
+            double x = dist * FastMath.sin(angleRadians);
+            double y = dist * FastMath.cos(angleRadians);
+
+            RobotLog.dd("ULTRO", "angle: " + i + " x: " + x +" y: " + y);
+            driver.move(Vector.from(x, y), 1, 0.5, 0);
+        }
+
+        driver.stopAndReset();
+
+
+
+        /*
+        driver.move(Vector.from(0, 8), 0.35);
+        sleep(3000);
+        driver.move(Vector.from(8, 0), 0.35);
+
+         */
     }
 }

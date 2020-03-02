@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.monitor.RobotData;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.firstinspires.ftc.teamcode.threading.Threader;
+import org.firstinspires.ftc.teamcode.threading.control.DriveThread;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.Arrays;
@@ -33,12 +34,16 @@ public final class MecanumDriver implements IDriver {
 
     private static final double COUNTS_PER_MOTOR_REV = 560;
     private static final double WHEEL_DIAMETER_INCHES   = 4.0;
-    private static final double COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV/(WHEEL_DIAMETER_INCHES * Math.PI);
+    private static final double COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV/(WHEEL_DIAMETER_INCHES * FastMath.PI);
 
     public MecanumDriver() {
+        this(false);
         this.map = DeviceMap.getInstance();
         this.motors = map.getDriveMotors();
-        this.test = true;
+    }
+
+    public MecanumDriver(boolean test) {
+        this.test = test;
     }
 
     public class Data {
@@ -176,15 +181,154 @@ public final class MecanumDriver implements IDriver {
     }
 
     public void move(Direction direction, double leftTop, double rightTop, double leftBottom, double rightBottom) {
-        map.getLeftTop().setPower(direction.getLeftTop() * leftTop);
-        map.getRightBottom().setPower(direction.getRightBottom() * rightBottom);
-        map.getRightTop().setPower(direction.getRightTop() * rightTop);
-        map.getLeftBottom().setPower(direction.getLeftBottom() * leftBottom);
+        if(test) return;
+        map.getLeftTop().setPower(leftTop * direction.getLeftTop());
+        map.getRightTop().setPower(rightTop * direction.getRightTop());
+        map.getLeftBottom().setPower(leftBottom * direction.getLeftBottom());
+        map.getRightBottom().setPower(rightBottom * direction.getRightBottom());
     }
 
     @Override
     public void move(Direction direction, double power, double inches) {
         move(direction, power, inches, false);
+    }
+
+    /**
+     * vectorized move function
+     * @param vector
+     * @param power
+     */
+    public void move(Vector vector, double power, double turnSpeed, double preferredAngleDegrees) {
+
+        double distanceToTarget = vector.length();
+        double angle2Target = FastMath.atan2(vector.getY(), vector.getX());
+
+        double currentAngle, relativeAngle;
+
+        //encoder things
+        this.clearBulkCache();
+        int[] current = getMotorCounts();
+        int[] old = Arrays.copyOf(current, current.length);
+
+
+        int leftTopTarget = Integer.MAX_VALUE;
+        int rightTopTarget = Integer.MAX_VALUE;
+        int leftBottomTarget = Integer.MAX_VALUE;
+        int rightBottomTarget = Integer.MAX_VALUE;
+        boolean last = true;
+        System.out.println("Vector: " + vector);
+
+
+        while(motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
+            double angle = getAngle();
+            currentAngle = FastMath.toRadians(angle);
+            relativeAngle = MathUtil.wrapAngle(angle2Target - currentAngle);
+
+            Vector relativeVector = Vector.from(
+                    distanceToTarget * FastMath.cos(relativeAngle),
+                    distanceToTarget * FastMath.sin(relativeAngle));
+
+            System.out.println("Relative Vector: " + relativeVector);
+            Vector normalized = relativeVector.normalize();
+
+            double movementX = normalized.getX();
+            double movementY = normalized.getY();
+
+
+            double calcY = relativeVector.getY() * COUNTS_PER_INCH;
+            double calcX = relativeVector.getX() * COUNTS_PER_INCH;
+            leftTopTarget = FastMath.abs(old[1] + (int) (0.5 + (calcY + calcX)));
+            rightTopTarget = FastMath.abs(old[2] + (int) (0.5 + (calcY - calcX)));
+            leftBottomTarget = FastMath.abs(old[2] + (int) (0.5 + (calcY - calcX)));
+            rightBottomTarget = FastMath.abs(old[3] + (int) (0.5 + (calcY + calcX)));
+            System.out.println("Encoder clicks: " + leftTopTarget + ", " + rightTopTarget + ", " + leftBottomTarget + ", " + rightBottomTarget);
+
+            //power things
+            double leftTopPower = power * (movementY + movementX);
+            double rightTopPower = power * (movementY - movementX);
+            double leftBottomPower = power * (movementY - movementX);
+            double rightBottomPower = power * (movementY + movementX);
+            System.out.println("Powers (before turning) clicks: " + leftTopPower + ", " + rightTopPower);
+            System.out.println("Powers (before turning) clicks: " + leftBottomPower + ", " + rightBottomPower);
+
+            //fix the angle
+            double preferredAngle = FastMath.toRadians(preferredAngleDegrees); //0 = front
+            double turnAngle = relativeAngle - FastMath.toRadians(90) + preferredAngle;
+            System.out.println("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
+            telemetry.addLine("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
+
+            double turnPower = Range.clip(turnAngle/Math.toRadians(30), -1, 1) * turnSpeed;
+
+            leftTopPower = leftTopPower + turnPower;
+            leftBottomPower = leftBottomPower + turnPower;
+
+            rightTopPower = rightTopPower - turnPower;
+            rightBottomPower = rightBottomPower - turnPower;
+
+            double[] powers = reduce(new double[]{leftTopPower, rightTopPower, leftBottomPower, rightBottomPower});
+
+            System.out.println("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
+            System.out.println("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
+
+
+            telemetry.addLine("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
+            telemetry.addLine("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
+            telemetry.update();
+
+            System.out.println('\n');
+            move(Direction.FORWARD, powers[0], powers[1], powers[2], powers[3]);
+
+
+            boolean now = FastMath.abs(turnPower) > 0.09;
+            if(last && !now) {
+                int[] current2 = getMotorCountsCached();
+
+                int[] deltaCount = new int[]{
+                        FastMath.abs(current2[0] - current[0]),
+                        FastMath.abs(current2[1] - current[1]),
+                        FastMath.abs(current2[2] - current[2]),
+                        FastMath.abs(current2[3] - current[3]),
+                };
+                current = current2;
+                System.out.println("motor counts:" + Arrays.toString(deltaCount));
+            }
+
+            last = now;
+        }
+    }
+
+    private double yesAngle = 0;
+    private double getAngle() {
+        if(test) {
+            //if (yesAngle >= -90) yesAngle -= 0.5;
+            return 10;
+        }else {
+            UltroImu imu = Threader.get(UltroImu.class);
+            return imu.getAngle();
+        }
+    }
+
+    private double[] reduce(double[] powers) {
+        //short check first
+        int j = 0;
+        for(double power : powers) {
+            if(FastMath.abs(power) > 1) j++;
+        }
+        if(j == 0) return powers;
+        double maxPower = powers[0];
+        for(int i = 1, length = powers.length; i < length; i++) {
+            if(FastMath.abs(powers[i]) > FastMath.abs(maxPower)) maxPower = powers[i];
+        }
+        maxPower = FastMath.abs(maxPower);
+        return new double[] {powers[0]/maxPower, powers[1]/maxPower, powers[2]/maxPower, powers[3]/maxPower};
+    }
+
+
+    public void await() {
+        getDriveThread().await();
+    }
+    public void move(Direction direction, double power, double inches, boolean gyroAssist) {
+        move(direction, power, inches, gyroAssist, 0);
     }
     /**
      * encoder drive
@@ -192,7 +336,7 @@ public final class MecanumDriver implements IDriver {
      * @param power
      * @param inches
      */
-    public void move(Direction direction, double power, double inches, boolean gyroAssist) {
+    public void move(Direction direction, double power, double inches, boolean gyroAssist, double preferredAngle) {
         /*
         if((direction == Direction.LEFT) || (direction == Direction.RIGHT)){
             inches *= (1D / 0.7D);
@@ -203,12 +347,6 @@ public final class MecanumDriver implements IDriver {
 
         double calc = COUNTS_PER_INCH * inches;
 
-
-        for(DcMotor motor : motors) {
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-
         int[] current = getMotorCounts();
         //other calculations needed
         int leftTopTarget = FastMath.abs(current[0] + (int) (calc * direction.getLeftTop()));
@@ -216,12 +354,13 @@ public final class MecanumDriver implements IDriver {
         int leftBottomTarget = FastMath.abs(current[2] + (int) (calc * direction.getLeftBottom()));
         int rightBottomTarget = FastMath.abs(current[3] + (int) (calc * direction.getRightBottom()));
 
+        //getDriveThread().setPosition(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget);
         double angle = 0, initialAngle = 0;
         if(gyroAssist) {
             UltroImu imu = Threader.get(UltroImu.class);
-            imu.resetAngle();
+            if(preferredAngle == 0) imu.resetAngle();
             angle = imu.getAngle();
-            initialAngle = angle;
+            initialAngle = preferredAngle;
         }
         LinearOpMode linear = null;
         if(map.getCurrentOpMode() instanceof AutoOpMode) {
@@ -229,29 +368,33 @@ public final class MecanumDriver implements IDriver {
             if(linear == null) return;
         }
         move(direction, power);
-        RobotLog.d("ULTRO", "START DRIVE");
+
         while(linear.opModeIsActive() && motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
-            if (gyroAssist){
-                gyroAssistor(direction, initialAngle, angle, power);
-                UltroImu imu = Threader.get(UltroImu.class);
-                angle = imu.getAngle();
-            }else move(direction, power);
-            RobotLog.dd("ULTRO", Arrays.toString(new double[]{
-                map.getLeftTop().getPower(),
-                map.getRightTop().getPower(),
-                map.getRightBottom().getPower(),
-                map.getLeftBottom().getPower()
-            }));
+            if (!gyroAssist) continue;
+            gyroAssistor(direction, initialAngle, angle, power);
+            UltroImu imu = Threader.get(UltroImu.class);
+            angle = imu.getAngle();
         }
 
-        stopAndReset();
     }
 
     private void gyroAssistor(Direction direction, double initialAngle, double angle, double power) {
-        addData("hello", "gyroAssistor");
-        updateTelemetry();
-        double[] newPowers = new double[] {power, power, power, power};
+        double delta = angle - initialAngle;
         double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
+
+        Direction dirHelper;
+        if(delta > 2) dirHelper = Direction.CLOCKWISE;
+        else if(delta < -2) dirHelper = Direction.COUNTERCLOCKWISE;
+        else dirHelper = Direction.NULL;
+
+        double leftTop = power - 0.1 * dirHelper.getLeftTop();
+        double rightTop = power + 0.1 * dirHelper.getRightTop();
+        double leftBottom = power - 0.1 * dirHelper.getLeftBottom();
+        double rightBottom = power + 0.1 * dirHelper.getRightBottom();
+        move(direction, leftTop, rightTop, leftBottom, rightBottom);
+
+        //power
+        /*
         switch (direction) {
             case FORWARD:
             case BACKWARD:
@@ -302,7 +445,8 @@ public final class MecanumDriver implements IDriver {
                 break;
         }
 
-        move(direction, newPowers[0], newPowers[1], newPowers[2], newPowers[3]);
+         */
+
     }
     /**
      * encoder drive
@@ -450,19 +594,29 @@ public final class MecanumDriver implements IDriver {
         int[] current = getMotorCounts();
         int[] target = new int[] { leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget };
         for(int i = 0; i < current.length; i++) {
-            if(FastMath.abs(current[i]) < FastMath.abs(target[i])) return true;
+            //1: current, target: 3 => current < target
+            //-1: current, target: -10 => c
+            if(FastMath.abs(current[i]) < target[i]) return true;
         }
         return false;
     }
 
-    public int[] getMotorCounts() {
-        map.clearBulkCache();
-        int leftTop = map.getLeftTop().getCurrentPosition();
-        int rightTop = map.getRightTop().getCurrentPosition();
-        int leftBottom = map.getLeftBottom().getCurrentPosition();
-        int rightBottom = map.getRightBottom().getCurrentPosition();
 
-        return new int[] { leftTop, rightTop, leftBottom, rightBottom};
+    private int[] testCounts = new int[] {0, 0, 0, 0};
+
+    public int[] getMotorCounts() {
+        if(test) {
+            for(int i = 0; i < testCounts.length; i++) {
+                testCounts[i]++;
+            }
+            return testCounts;
+        }
+        this.clearBulkCache();
+        return new int[] {map.getLeftTop().getCurrentPosition(), map.getRightTop().getCurrentPosition(), map.getLeftBottom().getCurrentPosition(), map.getRightBottom().getCurrentPosition()};
+    }
+    public int[] getMotorCountsCached() {
+        if(test) return getMotorCounts();
+        return new int[] {map.getLeftTop().getCurrentPosition(), map.getRightTop().getCurrentPosition(), map.getLeftBottom().getCurrentPosition(), map.getRightBottom().getCurrentPosition()};
     }
     /**
      * Updated mecanum drive function this year (math is ? ?? ? )
@@ -482,6 +636,44 @@ public final class MecanumDriver implements IDriver {
         map.getRightBottom().setPower(RB);
     }
 
+
+    public void moveFieldCentric(double left_stickX, double left_stickY, double right_stickX, double right_stickY) {
+        UltroImu imu = Threader.get(UltroImu.class);
+
+        //linear
+        double r = FastMath.hypot(left_stickX, left_stickY);
+        double angle = FastMath.atan2(left_stickY, left_stickX);
+
+
+        double robotAngle = imu.getAngle();
+        double relativeAngle = angle - FastMath.toRadians(robotAngle);
+
+        Vector vector = new Vector(r * FastMath.cos(relativeAngle), r * FastMath.sin(relativeAngle));
+
+
+        System.out.println(vector);
+        double movementX = vector.getX();
+        double movementY = vector.getY();
+
+        //rotation
+        double preferredAngle = FastMath.atan2(right_stickY, right_stickX);
+        double turnR = FastMath.hypot(right_stickX, right_stickY);
+        double turnAngle = relativeAngle - FastMath.toRadians(90) + preferredAngle;
+
+        double turnPower = Range.clip(turnAngle/Math.toRadians(30), -1, 1) * turnR;
+        //power things
+        double leftTopPower = (movementY + movementX) - turnPower;
+        double leftBottomPower = (movementY - movementX) - turnPower;
+
+        double rightTopPower = (movementY - movementX) + turnPower;
+        double rightBottomPower = (movementY + movementX) + turnPower;
+
+        double[] powers = reduce(new double[]{leftTopPower, rightTopPower, leftBottomPower, rightBottomPower});
+        System.out.println("Current angle: " + robotAngle);
+        System.out.println("powers: " + "[ " + powers[0] + " " + powers[1] +  " ]");
+        System.out.println("powers: " + "[ " + powers[2] + " " + powers[3] +  " ]");
+        move(Direction.FORWARD, powers[0], powers[1], powers[2], powers[3]);
+    }
     /**
      * Updated mecanum drive function this year (math is ? ?? ? )
      * @param left_stick_x gamepadleftX
@@ -490,19 +682,19 @@ public final class MecanumDriver implements IDriver {
      */
     public void moveTrigRed(double left_stick_x, double left_stick_y, double right_stick_x){
         // how much to amplify the power
-        double r = Math.hypot(left_stick_y, left_stick_x);
+        double r = FastMath.hypot(left_stick_y, left_stick_x);
 
         //calculates the angle of the joystick - 45 degrees
-        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - Math.PI / 4;
+        double robotAngle = FastMath.atan2(left_stick_y, left_stick_x) - FastMath.PI / 4;
 
         // rotation
         double rightX = right_stick_x;
 
         // equation for each of the wheels
-        final double LF = r * Math.cos(robotAngle) + rightX;
-        final double RF = r * Math.sin(robotAngle) - rightX;
-        final double LB = r * Math.sin(robotAngle) + rightX;
-        final double RB = r * Math.cos(robotAngle) - rightX;
+        final double LF = r * FastMath.cos(robotAngle) + rightX;
+        final double RF = r * FastMath.sin(robotAngle) - rightX;
+        final double LB = r * FastMath.sin(robotAngle) + rightX;
+        final double RB = r * FastMath.cos(robotAngle) - rightX;
 
         map.getLeftTop().setPower(LF);
         map.getRightTop().setPower(RF);
@@ -518,19 +710,19 @@ public final class MecanumDriver implements IDriver {
      */
     public void moveTrigBlue(double left_stick_x, double left_stick_y, double right_stick_x){
         // how much to amplify the power
-        double r = Math.hypot(left_stick_y, left_stick_x);
+        double r = FastMath.hypot(left_stick_y, left_stick_x);
 
         //calculates the angle of the joystick - 45 degrees
-        double robotAngle = Math.atan2(left_stick_y, left_stick_x) - ((5*Math.PI) / 4);
+        double robotAngle = FastMath.atan2(left_stick_y, left_stick_x) - ((5*Math.PI) / 4);
 
         // rotation
         double rightX = right_stick_x;
 
         // equation for each of the wheels
-        final double LF = r * Math.cos(robotAngle) + rightX;
-        final double RF = r * Math.sin(robotAngle) - rightX;
-        final double LB = r * Math.sin(robotAngle) + rightX;
-        final double RB = r * Math.cos(robotAngle) - rightX;
+        final double LF = r * FastMath.cos(robotAngle) + rightX;
+        final double RF = r * FastMath.sin(robotAngle) - rightX;
+        final double LB = r * FastMath.sin(robotAngle) + rightX;
+        final double RB = r * FastMath.cos(robotAngle) - rightX;
 
         map.getLeftTop().setPower(LF);
         map.getRightTop().setPower(RF);
@@ -664,8 +856,7 @@ public final class MecanumDriver implements IDriver {
 
     @Override
     public void stop() {
-        for(DcMotor motor : map.getDriveMotors())
-            motor.setPower(0);
+        move(Direction.FORWARD, 0);
     }
 
     public void setTelemetry(Telemetry telemetry) {
@@ -697,5 +888,15 @@ public final class MecanumDriver implements IDriver {
     }
     public void updateTelemetry() {
         if(test) telemetry.update();
+    }
+
+
+    private DriveThread getDriveThread() {
+        return Threader.get(DriveThread.class);
+    }
+
+    private void clearBulkCache() {
+        if(test) return;
+        map.clearBulkCache();
     }
 }

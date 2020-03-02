@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive;
 
+import net.jafama.FastMath;
+
 public final class MathUtil {
     public static double convert180to360(double angle) {
         if(angle > 0) return angle;
@@ -25,5 +27,26 @@ public final class MathUtil {
         }
 
         return limit360(angle);
+    }
+
+    public static double wrapAngle(double angle) {
+        double pi180 = 180;
+        if (-pi180 <= angle && angle <= pi180) {
+            return angle;
+        }
+
+
+        //181 => =-179
+        //-181 => 179
+
+        // 1 = 181 mod 180
+        double a = angle % pi180;
+        return sign(-a) * 180 + a;
+    }
+
+    public static double sign(double number) {
+        if(number == 0) return 0;
+        else if(number > 0) return 1;
+        else return -1;
     }
  }

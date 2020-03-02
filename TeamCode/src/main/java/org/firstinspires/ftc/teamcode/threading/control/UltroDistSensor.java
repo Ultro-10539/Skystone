@@ -9,9 +9,14 @@ import org.firstinspires.ftc.teamcode.threading.UltroThread;
 
 public class UltroDistSensor extends UltroThread {
     private DistanceSensor left, right, back, colorDLeft, colorDRight;
+    private final DistanceData data;
+    private class DistanceData {
+        private double left, right, back, colorLeft, colorRight;
+    }
 
     public UltroDistSensor() {
         super();
+        this.data = new DistanceData();
     }
 
     @Override
@@ -25,12 +30,16 @@ public class UltroDistSensor extends UltroThread {
 
     @Override
     public void go() {
-        RobotData.updateDistanceValues(
-            left.getDistance(DistanceUnit.CM),
-            right.getDistance(DistanceUnit.CM),
-            back.getDistance(DistanceUnit.CM),
-            colorDLeft.getDistance(DistanceUnit.CM),
-            colorDRight.getDistance(DistanceUnit.CM));
+        synchronized (data) {
+            data.left = left.getDistance(DistanceUnit.CM);
+            data.right = right.getDistance(DistanceUnit.CM);
+            data.back = back.getDistance(DistanceUnit.CM);
+            data.colorLeft = colorDLeft.getDistance(DistanceUnit.CM);
+            data.colorRight = colorDRight.getDistance(DistanceUnit.CM);
+        }
     }
 
+    public DistanceData getData() {
+        return data;
+    }
 }

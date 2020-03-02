@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.opmode;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -53,7 +54,7 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDriver;
  */
 
 public abstract class DriveOpMode extends OpMode {
-    private MecanumDriver driver;
+    protected MecanumDriver driver;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     /*
@@ -65,6 +66,9 @@ public abstract class DriveOpMode extends OpMode {
         mapper.setCurrentOpMode(this);
         mapper.setTelemetry(telemetry);
 
+        mapper.setUpDriveMotors(hardwareMap);
+        mapper.initLynx(hardwareMap);
+        mapper.setUpImu(hardwareMap);
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -80,10 +84,10 @@ public abstract class DriveOpMode extends OpMode {
         // Tell the driver that initialization is complete.
         driver = new MecanumDriver();
 
-
         driver.setTelemetry(telemetry);
         addData("Status", "Initialized");
         updateTelemetry();
+        mapper.setBulkMode(LynxModule.BulkCachingMode.AUTO);
     }
 
     /*

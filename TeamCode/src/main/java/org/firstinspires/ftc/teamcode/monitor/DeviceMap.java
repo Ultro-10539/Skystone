@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode.monitor;
 import android.content.Context;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -21,16 +21,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcontroller.ultro.listener.UltroVuforia;
+import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.revextensions2.ExpansionHubEx;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import java.util.List;
-//import java.util.concurrent.CompletableFuture;
-
 
 public final class DeviceMap {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
@@ -40,8 +38,6 @@ public final class DeviceMap {
     private static DeviceMap INSTANCE;
     private Telemetry telemetry;
     private OpMode currentOpMode;
-
-    private ExpansionHubEx expansionHub3, expansionHub2;
 
     private DcMotor leftTop, leftBottom, rightTop, rightBottom,
             leftIntake, rightIntake, conveyer, lift;
@@ -74,13 +70,11 @@ public final class DeviceMap {
         //for later
 
         INSTANCE = this;
-        setUpExpansionHub(map);
         //CompletableFuture.allOf(
         //).thenRunAsync(() -> {
         //}, service);
     }
     public void setupAll(HardwareMap map) {
-        setUpExpansionHub(map);
         setUpMotors(map); //init motors
         setUpImu(map); //init imu
         setUpVuforia(map); //init vuforia
@@ -91,9 +85,16 @@ public final class DeviceMap {
         initLynx(map);
     }
 
-    public void setUpExpansionHub(HardwareMap map) {
-        this.expansionHub3 = map.get(ExpansionHubEx.class, "Expansion Hub 3");
-        this.expansionHub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
+    public void setUpDriveMotors(HardwareMap map) {
+        leftTop = map.get(DcMotorEx.class, "LeftTop");
+        leftBottom = map.get(DcMotorEx.class, "LeftBottom");
+        rightTop = map.get(DcMotorEx.class, "RightTop");
+        rightBottom = map.get(DcMotorEx.class, "RightBottom");
+
+        this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
+
+        rightTop.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBottom.setDirection(DcMotorSimple.Direction.REVERSE);
     }
     /**
      * This will just set up all the driveMotors
@@ -103,10 +104,6 @@ public final class DeviceMap {
         //return CompletableFuture.runAsync(() -> {
             telemetry.addLine("Setting up driveMotors");
             telemetry.update();
-            leftTop = map.get(DcMotorEx.class, "LeftTop");
-            leftBottom = map.get(DcMotorEx.class, "LeftBottom");
-            rightTop = map.get(DcMotorEx.class, "RightTop");
-            rightBottom = map.get(DcMotorEx.class, "RightBottom");
 
 
             leftIntake = map.get(DcMotorEx.class, "leftIntake");
@@ -115,27 +112,27 @@ public final class DeviceMap {
             conveyer = map.get(DcMotorEx.class, "conveyor");
             lift = map.get(DcMotorEx.class, "lift");
 
-            this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
             this.intakeMotors = new DcMotor[] {
                      leftIntake, rightIntake, conveyer
             };
             this.allMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom,
                     leftIntake, rightIntake, conveyer, lift
             };
-            for(DcMotor motor : this.driveMotors) motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             for(DcMotor motor : this.allMotors) {
-                motor.setPower(0);
                 motor.setDirection(DcMotorSimple.Direction.FORWARD);
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
+
+
 
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
-            rightTop.setDirection(DcMotorSimple.Direction.REVERSE);
-            rightBottom.setDirection(DcMotorSimple.Direction.REVERSE);
-
             conveyer.setDirection(DcMotorSimple.Direction.REVERSE);
+
+            for(DcMotor motor : this.driveMotors)
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             telemetry.addLine("Finished setting up driveMotors");
         //}, service);
 
@@ -195,14 +192,12 @@ public final class DeviceMap {
 
             parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
             parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-            parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
             parameters.loggingEnabled      = true;
             parameters.loggingTag          = "IMU";
-            parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
             imu.initialize(parameters);
 
-            /*
+
             LinearOpMode linear = null;
             if(getCurrentOpMode() instanceof AutoOpMode) {
                 linear = (LinearOpMode) getCurrentOpMode();
@@ -214,7 +209,6 @@ public final class DeviceMap {
             }
             telemetry.addData("calibrated", imu.isGyroCalibrated());
 
-             */
         //}, service);
     }
 
@@ -281,13 +275,7 @@ public final class DeviceMap {
             tfod.deactivate();
     }
     public void deactivateLedDriver() {
-        ledDriver.close();
-    }
-    public ExpansionHubEx getExpansionHub3() {
-        return expansionHub3;
-    }
-    public ExpansionHubEx getExpansionHub2() {
-        return expansionHub2;
+        if(ledDriver != null) ledDriver.close();
     }
 
     //The methods below get all the driveMotors
@@ -432,6 +420,7 @@ public final class DeviceMap {
 
     public void setCurrentOpMode(OpMode currentOpMode) {
         this.currentOpMode = currentOpMode;
+        setTelemetry(currentOpMode.telemetry);
     }
 
     public TFObjectDetector getTfod() {

@@ -101,6 +101,16 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.all {
+            reports {
+                junitXml.enabled = true
+                html.enabled = false
+            }
+        }
+    }
 }
 
 repositories {

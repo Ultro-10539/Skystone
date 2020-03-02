@@ -18,12 +18,7 @@ public abstract class UltroThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            go();
-        }catch (Exception e) {
-            e.printStackTrace();
-            RobotLog.dd("ULTRO", e.getLocalizedMessage());
-        }
+        go();
     }
 
     public abstract void go();
@@ -33,6 +28,6 @@ public abstract class UltroThread implements Runnable {
         return TimeUnit.MILLISECONDS;
     }
     public long getTime() {
-        return 10L;
+        return 5L;
     }
 }

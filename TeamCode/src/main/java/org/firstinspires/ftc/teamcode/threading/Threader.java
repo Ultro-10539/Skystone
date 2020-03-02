@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.threading;
 
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
-import org.firstinspires.ftc.teamcode.threading.control.UltroDistSensor;
+import org.firstinspires.ftc.teamcode.threading.control.DriveThread;
 import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
-import org.firstinspires.ftc.teamcode.threading.control.UltroMotor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,15 @@ public final class Threader {
     public static void registerThreads() {
         if(service != null) service.shutdown();
         threads = new ArrayList<>();
-        service = Executors.newScheduledThreadPool(5, Executors.defaultThreadFactory());
+        service = Executors.newScheduledThreadPool(10);
+    }
 
+    public static void registerAuto() {
+        registerThreads();
+        registerRunnable(UltroImu.class);
+    }
+    public static void registerDrive() {
+        registerThreads();
         registerRunnable(UltroImu.class);
     }
 
@@ -39,11 +45,9 @@ public final class Threader {
     }
 
     public static <T extends UltroThread> T get(Class<T> clasz) {
-        for(UltroThread t : threads) {
-            Class<? extends UltroThread> test = t.getClass();
-            if(test == clasz)
-                return (T) t;
-        }
+        for(UltroThread t : threads)
+            if(t.getClass() == clasz) return (T) t;
         throw new IllegalStateException("type clasz was not a proper runnable " + clasz);
     }
+
 }
