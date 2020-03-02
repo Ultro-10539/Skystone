@@ -65,8 +65,6 @@ import java.util.List;
 public class DriveButtonOpMode extends DriveOpMode {
     private List<Button> buttons;
     private DcMotor lift;
-
-    private MecanumDriver driver;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -77,32 +75,9 @@ public class DriveButtonOpMode extends DriveOpMode {
     public String color = "red";
     @Override
     public void init() {
-        DeviceMap mapper = DeviceMap.getInstance(hardwareMap);
-        mapper.setTelemetry(telemetry);
-        mapper.setCurrentOpMode(this);
+        super.init();
 
-
-        mapper.setUpMotors(hardwareMap);
-        mapper.setupServos(hardwareMap);
-        mapper.setUpLEDs(hardwareMap);
-        mapper.initLynx(hardwareMap);
-
-        mapper.setBulkMode(LynxModule.BulkCachingMode.OFF);
-
-
-
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-
-        // Tell the driver that initialization is complete.
-        driver = new MecanumDriver();
-
-
-        driver.setTelemetry(telemetry);
+        DeviceMap mapper = DeviceMap.getInstance();
         addData("Status", "Initialized");
         updateTelemetry();
 

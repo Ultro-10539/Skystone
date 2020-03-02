@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.other;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.drive.Vector;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
@@ -12,8 +11,8 @@ import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.Locale;
 
-@Autonomous(name="IMU: help me", group="Linear Opmode")
-public class ImuAuto extends AutoOpMode {
+@Autonomous(name="Drive Test", group="Linear Opmode")
+public class DriveTest extends AutoOpMode {
     private DcMotor motor;
     @Override
     public void setup(DeviceMap map) {
@@ -32,7 +31,7 @@ public class ImuAuto extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Vector.from(0, 100), 0.2, 0.75, 0);
+        driver.move(Vector.from(-10, 0), 0.75, 0.8, 90);
 
     }
 }

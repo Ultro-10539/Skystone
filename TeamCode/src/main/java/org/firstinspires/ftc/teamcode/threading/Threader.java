@@ -21,12 +21,10 @@ public final class Threader {
 
     public static void registerAuto() {
         registerThreads();
-        registerRunnable(DriveThread.class);
         registerRunnable(UltroImu.class);
     }
     public static void registerDrive() {
         registerThreads();
-        registerRunnable(DriveThread.class);
         registerRunnable(UltroImu.class);
     }
 
@@ -51,4 +49,5 @@ public final class Threader {
             if(t.getClass() == clasz) return (T) t;
         throw new IllegalStateException("type clasz was not a proper runnable " + clasz);
     }
+
 }
