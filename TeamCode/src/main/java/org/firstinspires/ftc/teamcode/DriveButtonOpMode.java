@@ -73,6 +73,7 @@ public class DriveButtonOpMode extends DriveOpMode {
      * Code to run ONCE when the driver hits INIT
      */
     public String color = "red";
+
     @Override
     public void init() {
         super.init();
@@ -188,6 +189,8 @@ public class DriveButtonOpMode extends DriveOpMode {
     @Override
     public void start() {
         runtime.reset();
+        DeviceMap.getInstance().getRightAuto().setPosition(0.6);
+        DeviceMap.getInstance().getRightFinger().setPosition(0.0);
     }
 
     /*

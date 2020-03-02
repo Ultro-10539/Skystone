@@ -1,15 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
-import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
-import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
-import org.firstinspires.ftc.teamcode.skystone.SkystonePipeline;
-import org.firstinspires.ftc.teamcode.skystone.Status;
 
 @Autonomous(name = "Test Mode")
 public class testingOpmode extends AutoPart1 {
@@ -25,7 +19,15 @@ public class testingOpmode extends AutoPart1 {
     private void testMethod() {
 
         driver.stopAndReset();
-        driver.moveUntil(Direction.FORWARD, 0.3, data -> data.getBackDistance() < 16);
+        //uses left arm
+        map.getLeftAuto().setPosition(1.0);
+        map.getLeftFinger().setPosition(1.0);
+        sleep(500);
+        map.getLeftAuto().setPosition(0.6);
+        sleep(2000);
+
+        //        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
+//        addData("val", map.getDistanceBack().getDistance(DistanceUnit.CM));
     }
 
 

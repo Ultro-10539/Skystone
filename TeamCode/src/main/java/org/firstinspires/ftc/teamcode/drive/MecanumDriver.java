@@ -98,18 +98,9 @@ public final class MecanumDriver implements IDriver {
         rightBottom.setPower(rightBottom.getPower() + direction.getRightBottom() * power);
     }
 
-    public void append(double... powers) {
-        DcMotor leftTop = map.getLeftTop();
-        DcMotor rightTop = map.getRightTop();
-        DcMotor leftBottom = map.getLeftBottom();
-        DcMotor rightBottom = map.getRightBottom();
-
-        leftTop.setPower(leftTop.getPower() + powers[0]);
-        rightTop.setPower(rightTop.getPower() + powers[1]);
-        leftBottom.setPower(leftBottom.getPower() + powers[2]);
-        rightBottom.setPower(rightBottom.getPower() + powers[3]);
+    public void moveUntil(Direction direction, double power, Predicate<Data> dataPredicate) {
+        moveUntil(direction, power, dataPredicate, false);
     }
-
     /**
      * Move until a specified condition is reached
      * @param direction
@@ -117,7 +108,15 @@ public final class MecanumDriver implements IDriver {
      * @param dataPredicate if this returns true, then the robot will stop.
      *                      The data class has all the sensors necessary to make easy access of sensors possible.
      */
-    public void moveUntil(Direction direction, double power, Predicate<Data> dataPredicate) {
+    public void moveUntil(Direction direction, double power, Predicate<Data> dataPredicate, boolean gyroAssist) {
+        double angle = 0, initialAngle = 0;
+        if(gyroAssist) {
+            UltroImu imu = Threader.get(UltroImu.class);
+            imu.resetAngle();
+            angle = imu.getAngle();
+            initialAngle = angle;
+        }
+
         move(direction, power);
         Data data = new Data();
         //it is with an exclamation point for human readable logic
@@ -126,9 +125,41 @@ public final class MecanumDriver implements IDriver {
         while(!dataPredicate.test(data)) {
             long deltaTime = System.currentTimeMillis() - startTime;
             if(deltaTime > TIMEOUT)
-                break;
+                return;
+            if (gyroAssist){
+                gyroAssistor(direction, initialAngle, angle, power);
+                UltroImu imu = Threader.get(UltroImu.class);
+                angle = imu.getAngle();
+            }
         }
         stop();
+    }
+    /**
+     * Drive until a conditional is true
+     * @param direction
+     * @param power
+     * @param conditional
+     * @param gyroAssist
+     */
+    public void moveCond(Direction direction, double power, boolean conditional, boolean gyroAssist){
+        double angle = 0, initialAngle = 0;
+        if(gyroAssist) {
+            UltroImu imu = Threader.get(UltroImu.class);
+            imu.resetAngle();
+            angle = imu.getAngle();
+            initialAngle = angle;
+        }
+        LinearOpMode linear = null;
+
+        while (linear.opModeIsActive() && conditional){
+            move(direction, power);
+            if (gyroAssist){
+                gyroAssistor(direction, initialAngle, angle, power);
+                UltroImu imu = Threader.get(UltroImu.class);
+                angle = imu.getAngle();
+            }
+        }
+        move(direction, 0);
     }
 
     public void stopAndReset(){
