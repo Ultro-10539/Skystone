@@ -25,6 +25,7 @@ public class TestAuto extends AutoOpMode {
         map.setUpDriveMotors(hardwareMap);
         map.setUpImu(hardwareMap);
         map.initLynx(hardwareMap);
+        map.setupServos(hardwareMap);
     }
 
     @Override
@@ -34,6 +35,11 @@ public class TestAuto extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Vector.from(-100, 0), 0.4, 0.1, -90);
+        DeviceMap map = DeviceMap.getInstance();
+        map.getFoundationLeft().setPosition(1);
+        map.getFoundationRight().setPosition(0);
+
+        sleep(1200);
+        driver.move(Vector.from(10, 7), 0.8, 0.7, -90);
     }
 }

@@ -228,7 +228,7 @@ public final class MecanumDriver implements IDriver {
                     distanceToTarget * FastMath.cos(relativeAngle),
                     distanceToTarget * FastMath.sin(relativeAngle));
 
-            System.out.println("Relative Vector: " + relativeVector);
+            //System.out.println("Relative Vector: " + relativeVector);
             Vector normalized = relativeVector.normalize();
 
             double movementX = normalized.getX();
@@ -241,19 +241,19 @@ public final class MecanumDriver implements IDriver {
             rightTopTarget = FastMath.abs(old[2] + (int) (0.5 + (calcY - calcX)));
             leftBottomTarget = FastMath.abs(old[2] + (int) (0.5 + (calcY - calcX)));
             rightBottomTarget = FastMath.abs(old[3] + (int) (0.5 + (calcY + calcX)));
-            System.out.println("Encoder clicks: " + leftTopTarget + ", " + rightTopTarget + ", " + leftBottomTarget + ", " + rightBottomTarget);
+            //System.out.println("Encoder clicks: " + leftTopTarget + ", " + rightTopTarget + ", " + leftBottomTarget + ", " + rightBottomTarget);
 
             //power things
             double leftTopPower = power * (movementY + movementX);
             double rightTopPower = power * (movementY - movementX);
             double leftBottomPower = power * (movementY - movementX);
             double rightBottomPower = power * (movementY + movementX);
-            System.out.println("Powers (before turning) clicks: " + leftTopPower + ", " + rightTopPower);
-            System.out.println("Powers (before turning) clicks: " + leftBottomPower + ", " + rightBottomPower);
+            //System.out.println("Powers (before turning) clicks: " + leftTopPower + ", " + rightTopPower);
+            //System.out.println("Powers (before turning) clicks: " + leftBottomPower + ", " + rightBottomPower);
 
             //fix the angle
             double preferredAngle = FastMath.toRadians(preferredAngleDegrees); //0 = front
-            double turnAngle = relativeAngle - FastMath.toRadians(90) + preferredAngle;
+            double turnAngle = MathUtil.wrapAngle(relativeAngle - FastMath.toRadians(90) + preferredAngle);
             System.out.println("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
             telemetry.addLine("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
 
@@ -267,6 +267,7 @@ public final class MecanumDriver implements IDriver {
 
             double[] powers = reduce(new double[]{leftTopPower, rightTopPower, leftBottomPower, rightBottomPower});
 
+
             System.out.println("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
             System.out.println("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
 
@@ -276,6 +277,8 @@ public final class MecanumDriver implements IDriver {
             telemetry.update();
 
             System.out.println('\n');
+
+
             move(Direction.FORWARD, powers[0], powers[1], powers[2], powers[3]);
 
 
@@ -298,10 +301,10 @@ public final class MecanumDriver implements IDriver {
     }
 
     private double yesAngle = 0;
-    private double getAngle() {
+    public double getAngle() {
         if(test) {
-            //if (yesAngle >= -90) yesAngle -= 0.5;
-            return 10;
+            if (yesAngle >= -90) yesAngle -= 0.5;
+            return yesAngle;
         }else {
             UltroImu imu = Threader.get(UltroImu.class);
             return imu.getAngle();
