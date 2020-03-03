@@ -13,8 +13,8 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         forwardRed();
         sampleStone();
         firstSample();
-//        secondSample();
-//        foundation();
+        secondSample();
+        foundation();
     }
 
 
@@ -133,7 +133,7 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         driver.turn(0.5, -83);
 
         //line up with foundation
-        driver.move(Direction.BACKWARD, 0.3, 9, true);
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 && data.getColorRightDistance() <= 15), true);
 
         //grab foundation and drop stone
         map.getFoundationLeft().setPosition(1);
@@ -144,8 +144,8 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         map.getLeftFinger().setPosition(1.0);
         map.getRightFinger().setPosition(0.0);
         //push foundation into correct position
-        driver.move(Direction.FORWARD, 0.9, 8, true);
-        driver.turn(0.7, -74);
+        driver.move(Direction.FORWARD, 0.9, 9, true);
+        driver.turn(0.7, -73);
         map.getFoundationLeft().setPosition(0);
         map.getFoundationRight().setPosition(1);
         driver.move(Direction.LEFT, 0.7, 5, false);
@@ -153,11 +153,8 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
     }
 
     protected void secondSample() {
-        //TODO: change distance value so that robot is properly aligned to pick up right/middle
-        driver.moveUntil(Direction.FORWARD, 0.4, data -> data.getBackDistance() <= 120);
-
         //faces stones
-        driver.turn(0.5, -83);
+        driver.turn(0.5, 83);
 
         //prepares stones
         switch(pos){
@@ -202,13 +199,12 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         //samples stones
         sampleStone();
         driver.turn(0.7, -76);
-        //line up with wall
-        driver.moveUntil(Direction.FORWARD, 0.7, data -> data.getBackDistance() <= 12, true);
+        driver.move(Direction.FORWARD, 0.7, 10, true);
     }
 
     protected void foundation(){
         //Drives toward foundation
-        driver.move(Direction.BACKWARD, 0.9, 100, true);
+        driver.move(Direction.BACKWARD, 0.9, 75, true);
         driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
         //grab foundation and drop stone
         map.getLeftFinger().setPosition(0.6);
