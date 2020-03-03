@@ -203,7 +203,7 @@ public final class MecanumDriver implements IDriver {
         double distanceToTarget = vector.length();
         double angle2Target = FastMath.atan2(vector.getY(), vector.getX());
 
-        double currentAngle, relativeAngle;
+        double relativeAngle;
 
         //encoder things
         this.clearBulkCache();
@@ -219,14 +219,16 @@ public final class MecanumDriver implements IDriver {
         System.out.println("Vector: " + vector);
 
 
+        double angle2TargetDegrees = FastMath.toDegrees(angle2Target);
+        double prefferedRadians = FastMath.toRadians(preferredAngleDegrees);
         while(motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
-            double angle = getAngle();
-            currentAngle = FastMath.toRadians(angle);
-            relativeAngle = MathUtil.wrapAngle(angle2Target - currentAngle);
+            double currentAngle = getAngle();
+            relativeAngle = MathUtil.wrapAngle(angle2TargetDegrees - currentAngle);
 
+            double relativeAngleRadians = FastMath.toRadians(relativeAngle);
             Vector relativeVector = Vector.from(
-                    distanceToTarget * FastMath.cos(relativeAngle),
-                    distanceToTarget * FastMath.sin(relativeAngle));
+                    distanceToTarget * FastMath.cos(relativeAngleRadians),
+                    distanceToTarget * FastMath.sin(relativeAngleRadians));
 
             //System.out.println("Relative Vector: " + relativeVector);
             Vector normalized = relativeVector.normalize();
@@ -252,18 +254,17 @@ public final class MecanumDriver implements IDriver {
             //System.out.println("Powers (before turning) clicks: " + leftBottomPower + ", " + rightBottomPower);
 
             //fix the angle
-            double preferredAngle = FastMath.toRadians(preferredAngleDegrees); //0 = front
-            double turnAngle = MathUtil.wrapAngle(relativeAngle - FastMath.toRadians(90) + preferredAngle);
-            System.out.println("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
-            telemetry.addLine("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
+            double turnAngle = FastMath.toRadians(currentAngle)- prefferedRadians;
+            System.out.println("Current angle: " + currentAngle + " Relative angle: " + relativeAngle + " Turn Angle: " + FastMath.toDegrees(turnAngle));
+            //telemetry.addLine("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
 
             double turnPower = Range.clip(turnAngle/Math.toRadians(30), -1, 1) * turnSpeed;
 
-            leftTopPower = leftTopPower + turnPower;
-            leftBottomPower = leftBottomPower + turnPower;
+            leftTopPower = leftTopPower - turnPower;
+            leftBottomPower = leftBottomPower - turnPower;
 
-            rightTopPower = rightTopPower - turnPower;
-            rightBottomPower = rightBottomPower - turnPower;
+            rightTopPower = rightTopPower + turnPower;
+            rightBottomPower = rightBottomPower + turnPower;
 
             double[] powers = reduce(new double[]{leftTopPower, rightTopPower, leftBottomPower, rightBottomPower});
 
@@ -271,11 +272,11 @@ public final class MecanumDriver implements IDriver {
             System.out.println("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
             System.out.println("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
 
-
+/*
             telemetry.addLine("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
             telemetry.addLine("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
             telemetry.update();
-
+ */
             System.out.println('\n');
 
 
@@ -300,10 +301,10 @@ public final class MecanumDriver implements IDriver {
         }
     }
 
-    private double yesAngle = 0;
+    private double yesAngle = 0.5;
     public double getAngle() {
         if(test) {
-            if (yesAngle >= -90) yesAngle -= 0.5;
+            if (yesAngle >= -135) yesAngle -= 0.5;
             return yesAngle;
         }else {
             UltroImu imu = Threader.get(UltroImu.class);
@@ -330,16 +331,13 @@ public final class MecanumDriver implements IDriver {
     public void await() {
         getDriveThread().await();
     }
-    public void move(Direction direction, double power, double inches, boolean gyroAssist) {
-        move(direction, power, inches, gyroAssist, 0);
-    }
     /**
      * encoder drive
      * @param direction
      * @param power
      * @param inches
      */
-    public void move(Direction direction, double power, double inches, boolean gyroAssist, double preferredAngle) {
+    public void move(Direction direction, double power, double inches, boolean gyroAssist) {
         /*
         if((direction == Direction.LEFT) || (direction == Direction.RIGHT)){
             inches *= (1D / 0.7D);
@@ -361,9 +359,9 @@ public final class MecanumDriver implements IDriver {
         double angle = 0, initialAngle = 0;
         if(gyroAssist) {
             UltroImu imu = Threader.get(UltroImu.class);
-            if(preferredAngle == 0) imu.resetAngle();
+            imu.resetAngle();
             angle = imu.getAngle();
-            initialAngle = preferredAngle;
+            initialAngle = angle;
         }
         LinearOpMode linear = null;
         if(map.getCurrentOpMode() instanceof AutoOpMode) {
@@ -382,22 +380,8 @@ public final class MecanumDriver implements IDriver {
     }
 
     private void gyroAssistor(Direction direction, double initialAngle, double angle, double power) {
-        double delta = angle - initialAngle;
+        double[] newPowers = new double[] {power, power, power, power};
         double correctedPower = power * calculatePowerMultiplierLinear(0, angle, power);
-
-        Direction dirHelper;
-        if(delta > 2) dirHelper = Direction.CLOCKWISE;
-        else if(delta < -2) dirHelper = Direction.COUNTERCLOCKWISE;
-        else dirHelper = Direction.NULL;
-
-        double leftTop = power - 0.1 * dirHelper.getLeftTop();
-        double rightTop = power + 0.1 * dirHelper.getRightTop();
-        double leftBottom = power - 0.1 * dirHelper.getLeftBottom();
-        double rightBottom = power + 0.1 * dirHelper.getRightBottom();
-        move(direction, leftTop, rightTop, leftBottom, rightBottom);
-
-        //power
-        /*
         switch (direction) {
             case FORWARD:
             case BACKWARD:
@@ -419,6 +403,7 @@ public final class MecanumDriver implements IDriver {
                     }
                 }
                 break;
+                /*
             case LEFT:
 
                 if(angle > initialAngle + 2) {
@@ -446,10 +431,11 @@ public final class MecanumDriver implements IDriver {
                     newPowers[3] = power + 0.1D;
                 }
                 break;
+
+                 */
         }
 
-         */
-
+        move(direction, newPowers[0], newPowers[1], newPowers[2], newPowers[3]);
     }
     /**
      * encoder drive

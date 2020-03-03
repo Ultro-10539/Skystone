@@ -40,6 +40,7 @@ public class TestAuto extends AutoOpMode {
         map.getFoundationRight().setPosition(0);
 
         sleep(1200);
-        driver.move(Vector.from(10, 7), 0.8, 0.7, -90);
+        driver.move(Vector.from(8, 2), 0.8, 0.7, -90);
+        driver.stop();
     }
 }

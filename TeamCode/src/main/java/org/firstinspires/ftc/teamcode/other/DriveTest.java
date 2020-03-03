@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.other;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.drive.Vector;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
@@ -31,7 +32,7 @@ public class DriveTest extends AutoOpMode {
 
     @Override
     public void run() {
-        driver.move(Vector.from(-10, 0), 0.75, 0.8, 90);
+        driver.move(Direction.BACKWARD, 0.7, 21, true);
 
     }
 }
