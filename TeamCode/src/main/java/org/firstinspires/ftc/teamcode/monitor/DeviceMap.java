@@ -93,8 +93,14 @@ public final class DeviceMap {
 
         this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
 
+        leftTop.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftBottom.setDirection(DcMotorSimple.Direction.FORWARD);
         rightTop.setDirection(DcMotorSimple.Direction.REVERSE);
         rightBottom.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        for(DcMotor motor : this.driveMotors)
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
     /**
      * This will just set up all the driveMotors
@@ -115,24 +121,22 @@ public final class DeviceMap {
             this.intakeMotors = new DcMotor[] {
                      leftIntake, rightIntake, conveyer
             };
-            this.allMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom,
-                    leftIntake, rightIntake, conveyer, lift
-            };
+            this.allMotors = new DcMotor[]{leftIntake, rightIntake, conveyer, lift};
             for(DcMotor motor : this.allMotors) {
                 motor.setDirection(DcMotorSimple.Direction.FORWARD);
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
-
+            this.allMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom,
+                    leftIntake, rightIntake, conveyer, lift
+            };
 
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
             conveyer.setDirection(DcMotorSimple.Direction.REVERSE);
 
-            for(DcMotor motor : this.driveMotors)
-                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             telemetry.addLine("Finished setting up driveMotors");
         //}, service);
 
