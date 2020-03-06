@@ -18,7 +18,12 @@ public abstract class UltroThread implements Runnable {
 
     @Override
     public void run() {
-        go();
+        try {
+            go();
+        }catch (Exception e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }
     }
 
     public abstract void go();

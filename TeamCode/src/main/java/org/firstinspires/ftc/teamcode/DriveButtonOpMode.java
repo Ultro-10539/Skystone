@@ -170,8 +170,22 @@ public class DriveButtonOpMode extends DriveOpMode {
                         }
                 }).build(),
             builder.setGetter(() -> gamepad2.b)
-                    .setbFunction(() -> lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER))
-                .build()
+                    .setbFunction(() -> {
+                        if(mapper.getCap().getPosition() < 0.5) {
+                            mapper.getCap().setPosition(1);
+                        }else mapper.getCap().setPosition(0);
+                    }).build(),
+
+            builder.setGetter(() -> !gamepad2.dpad_up)
+                .setbFunction(()-> {
+                    mapper.getLift().setPower(0);
+                }).build(),
+
+            builder.setGetter(() -> !gamepad2.dpad_down)
+                .setbFunction(()->{
+                mapper.getLift().setPower(0);
+            }).build()
+
             ));
         return buttons;
     }
@@ -189,8 +203,13 @@ public class DriveButtonOpMode extends DriveOpMode {
     @Override
     public void start() {
         runtime.reset();
-        DeviceMap.getInstance().getRightAuto().setPosition(0.6);
-        DeviceMap.getInstance().getRightFinger().setPosition(0.0);
+        DeviceMap mapper = DeviceMap.getInstance();
+        mapper.getRightAuto().setPosition(0.6);
+        mapper.getRightFinger().setPosition(0.0);
+        mapper.getClaw().setPosition(1);
+        mapper.getArm1().setPosition(1);
+        mapper.getArm2().setPosition(1);
+
     }
 
     /*
@@ -207,7 +226,8 @@ public class DriveButtonOpMode extends DriveOpMode {
             driver.moveTrigRed(x / multiplier, y / multiplier, right_stick_x / multiplier);
         else driver.moveTrigBlue(x / multiplier, y / multiplier, right_stick_x / multiplier);
         driver.intake(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
-        driver.conveyer(-gamepad2.right_trigger);
+
+        driver.conveyer(gamepad2.left_trigger - gamepad2.right_trigger);
 
         if (gamepad1.right_trigger > 0) {
             mapper.getFoundationLeft().setPosition(1);
@@ -234,12 +254,12 @@ public class DriveButtonOpMode extends DriveOpMode {
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             lift.setPower(-1);
         }else if (gamepad2.a){
-            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             lift.setTargetPosition(50);
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             lift.setPower(-1);
         }else if (gamepad2.y) {
-            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             lift.setTargetPosition(2000);
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             lift.setPower(1);
         }else if (!lift.isBusy()){
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

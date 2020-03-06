@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.drive.Vector;
 
 @Autonomous(name = "Test Mode")
 public class testingOpmode extends AutoPart1 {
@@ -20,11 +21,12 @@ public class testingOpmode extends AutoPart1 {
 
         driver.stopAndReset();
         //uses left arm
-        map.getLeftAuto().setPosition(1.0);
-        map.getLeftFinger().setPosition(1.0);
-        sleep(500);
-        map.getLeftAuto().setPosition(0.6);
-        sleep(2000);
+        driver.turn(0.7, -76);
+        driver.move(Vector.from(-75, 0), 0.7, 0.77, -87.8);
+
+        //90 - -87.8
+        //180 - -178
+        //270 - -266
 
         //        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
 //        addData("val", map.getDistanceBack().getDistance(DistanceUnit.CM));

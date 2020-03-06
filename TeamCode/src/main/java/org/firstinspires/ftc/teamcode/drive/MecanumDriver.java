@@ -221,6 +221,7 @@ public final class MecanumDriver implements IDriver {
 
         double angle2TargetDegrees = FastMath.toDegrees(angle2Target);
         double prefferedRadians = FastMath.toRadians(preferredAngleDegrees);
+        double oneThird = 1D/5D;
         while(motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
             double currentAngle = getAngle();
             relativeAngle = MathUtil.wrapAngle(angle2TargetDegrees - currentAngle);
@@ -254,11 +255,14 @@ public final class MecanumDriver implements IDriver {
             //System.out.println("Powers (before turning) clicks: " + leftBottomPower + ", " + rightBottomPower);
 
             //fix the angle
-            double turnAngle = FastMath.toRadians(currentAngle)- prefferedRadians;
+
+            double turnAngle =  FastMath.toRadians(currentAngle) - prefferedRadians;
+
+
             System.out.println("Current angle: " + currentAngle + " Relative angle: " + relativeAngle + " Turn Angle: " + FastMath.toDegrees(turnAngle));
             //telemetry.addLine("Current angle: " + FastMath.toDegrees(currentAngle) + " Relative angle: " + FastMath.toDegrees(relativeAngle) + " Turn Angle: " + turnAngle);
 
-            double turnPower = Range.clip(turnAngle/Math.toRadians(30), -1, 1) * turnSpeed;
+            double turnPower = Range.clip(turnAngle/FastMath.toRadians(20), -1, 1) * turnSpeed;
 
             leftTopPower = leftTopPower - turnPower;
             leftBottomPower = leftBottomPower - turnPower;
@@ -269,7 +273,10 @@ public final class MecanumDriver implements IDriver {
             double[] powers = reduce(new double[]{leftTopPower, rightTopPower, leftBottomPower, rightBottomPower});
 
 
-            System.out.println("Powers (after turning) clicks: " + powers[0] + ", " + powers[1]);
+            System.out.println("Turning (after turning) clicks: -" + turnPower +  ", +" + turnPower);
+            System.out.println("Turning (after turning) clicks: -" + turnPower + ", +" + turnPower);
+
+            System.out.println("Powers (after turning) clicks: " + powers[0] +  ", " + powers[1]);
             System.out.println("Powers (after turning) clicks: " + powers[2] + ", " + powers[3]);
 
 /*
@@ -301,14 +308,14 @@ public final class MecanumDriver implements IDriver {
         }
     }
 
-    private double yesAngle = 0.5;
+    private double yesAngle = -80;
     public double getAngle() {
         if(test) {
-            if (yesAngle >= -135) yesAngle -= 0.5;
+            if (yesAngle >= -120) yesAngle -= 0.005;
             return yesAngle;
         }else {
             UltroImu imu = Threader.get(UltroImu.class);
-            return imu.getAngle();
+            return imu.getGlobalAngle();
         }
     }
 
@@ -627,14 +634,13 @@ public final class MecanumDriver implements IDriver {
 
 
     public void moveFieldCentric(double left_stickX, double left_stickY, double right_stickX, double right_stickY) {
-        UltroImu imu = Threader.get(UltroImu.class);
 
         //linear
         double r = FastMath.hypot(left_stickX, left_stickY);
         double angle = FastMath.atan2(left_stickY, left_stickX);
 
 
-        double robotAngle = imu.getAngle();
+        double robotAngle = getAngle();
         double relativeAngle = angle - FastMath.toRadians(robotAngle);
 
         Vector vector = new Vector(r * FastMath.cos(relativeAngle), r * FastMath.sin(relativeAngle));
@@ -647,7 +653,7 @@ public final class MecanumDriver implements IDriver {
         //rotation
         double preferredAngle = FastMath.atan2(right_stickY, right_stickX);
         double turnR = FastMath.hypot(right_stickX, right_stickY);
-        double turnAngle = relativeAngle - FastMath.toRadians(90) + preferredAngle;
+        double turnAngle =  FastMath.toRadians(robotAngle) - preferredAngle - FastMath.toRadians(90);
 
         double turnPower = Range.clip(turnAngle/Math.toRadians(30), -1, 1) * turnR;
         //power things
@@ -762,7 +768,7 @@ public final class MecanumDriver implements IDriver {
         while ((linear != null && linear.opModeIsActive()) && !(min <= currentAngle && currentAngle <= max)) {
             currentAngle = imu.getAngle();
         }
-        stop();
+        stopAndReset();
 
         updateTelemetry();
     }

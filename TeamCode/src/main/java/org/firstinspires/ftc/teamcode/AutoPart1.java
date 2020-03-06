@@ -20,6 +20,7 @@ public abstract class AutoPart1 extends AutoOpMode {
     public void setup(DeviceMap map) {
 
         map.setUpImu(hardwareMap);
+        map.setUpDriveMotors(hardwareMap);
         map.setUpMotors(hardwareMap);
         map.setupSensors(hardwareMap);
         map.setupServos(hardwareMap);

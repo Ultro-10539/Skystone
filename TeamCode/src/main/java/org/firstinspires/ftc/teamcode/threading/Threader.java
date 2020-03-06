@@ -14,9 +14,8 @@ public final class Threader {
     private static ScheduledExecutorService service;
 
     public static void registerThreads() {
-        if(service != null) service.shutdown();
-        threads = new ArrayList<>();
-        service = Executors.newScheduledThreadPool(10);
+        if(threads == null) threads = new ArrayList<>();
+        if(service == null) service = Executors.newScheduledThreadPool(10);
     }
 
     public static void registerAuto() {
@@ -29,13 +28,14 @@ public final class Threader {
     }
 
     public static void destroy() {
-        service.shutdown();
-        service = null;
+        //service.shutdown();
     }
 
     private static void registerRunnable(Class<? extends UltroThread> clasz) {
+
         try {
             UltroThread thread = clasz.newInstance();
+            if(contains(clasz)) return;
             DeviceMap.getInstance().getTelemetry().addData("Added thread: ", clasz.getName());
             threads.add(thread);
             service.scheduleAtFixedRate(thread, 0, thread.getTime(), thread.getTimeUnit());
@@ -44,6 +44,15 @@ public final class Threader {
         }
     }
 
+    private static boolean contains(Class<? extends UltroThread> clasz) {
+        for(UltroThread thread : threads) {
+            if(thread.getClass() == clasz) {
+                DeviceMap.getInstance().getTelemetry().addData("Already loaded thread: ", clasz.getName());
+                return true;
+            }
+        }
+        return false;
+    }
     public static <T extends UltroThread> T get(Class<T> clasz) {
         for(UltroThread t : threads)
             if(t.getClass() == clasz) return (T) t;
