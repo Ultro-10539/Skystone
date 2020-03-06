@@ -193,12 +193,16 @@ public final class MecanumDriver implements IDriver {
         move(direction, power, inches, false);
     }
 
+    public void move(Vector vector, double power, double turnSpeed, double preferredAngleDegrees) {
+        this.move(vector, power, turnSpeed, preferredAngleDegrees, null);
+    }
+
     /**
      * vectorized move function
      * @param vector
      * @param power
      */
-    public void move(Vector vector, double power, double turnSpeed, double preferredAngleDegrees) {
+    public void move(Vector vector, double power, double turnSpeed, double preferredAngleDegrees, Predicate<Data> dataPredicate) {
 
         double distanceToTarget = vector.length();
         double angle2Target = FastMath.atan2(vector.getY(), vector.getX());
@@ -221,8 +225,9 @@ public final class MecanumDriver implements IDriver {
 
         double angle2TargetDegrees = FastMath.toDegrees(angle2Target);
         double prefferedRadians = FastMath.toRadians(preferredAngleDegrees);
-        double oneThird = 1D/5D;
-        while(motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget)) {
+        Data data = new Data();
+        while(motorsBusy(leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget) ||
+                (dataPredicate != null && !dataPredicate.test(data))) {
             double currentAngle = getAngle();
             relativeAngle = MathUtil.wrapAngle(angle2TargetDegrees - currentAngle);
 

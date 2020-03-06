@@ -63,41 +63,30 @@ import java.util.List;
 
 @TeleOp(name="Driver Button op mode", group="Iterative Opmode")
 public class DriveButtonOpMode extends DriveOpMode {
-    private List<Button> buttons;
     private DcMotor lift;
-    // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-
     private boolean liftOverride = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
-    public String color = "red";
+    private String color = "red";
 
     @Override
-    public void init() {
-        super.init();
-
-        DeviceMap mapper = DeviceMap.getInstance();
+    protected void afterInit(DeviceMap mapper) {
         addData("Status", "Initialized");
         updateTelemetry();
 
         this.lift = mapper.getLift();
-        buttons = this.setUpButtons(mapper);
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public List<Button> setUpButtons(DeviceMap mapper) {
-        Button.Builder builder = new Button.Builder();
-        List<Button> buttons = new ArrayList<>();
-
+    @Override
+    protected List<Button> setUpButtons(Button.Builder builder, DeviceMap mapper) {
         Servo left = mapper.getLeftAuto();
         Servo right = mapper.getRightAuto();
 
         Servo leftPinch = mapper.getLeftFinger();
         Servo rightPinch = mapper.getRightFinger();
 
+        List<Button> buttons = new ArrayList<>();
         buttons.addAll(Arrays.asList(
             builder.setGetter(() -> gamepad1.a)
                 .setbFunction(() -> {
@@ -107,7 +96,6 @@ public class DriveButtonOpMode extends DriveOpMode {
                         right.setPosition(0.6);
                     }
                 }).build(),
-
             builder.setGetter(() -> gamepad1.x)
                 .setbFunction(() -> {
                     if(rightPinch.getPosition() >= 0.45){
@@ -116,7 +104,6 @@ public class DriveButtonOpMode extends DriveOpMode {
                         rightPinch.setPosition(0.5);
                     }
                 }).build(),
-
             builder.setGetter(() -> gamepad1.b)
                 .setbFunction(() -> {
                     if(left.getPosition() <= 0.65){
@@ -142,86 +129,93 @@ public class DriveButtonOpMode extends DriveOpMode {
                     }
                 }).build(),
             builder.setGetter(() -> gamepad1.left_bumper)
-                    .setbFunction(() -> {
-                        if (color.equalsIgnoreCase("red")) {
-                            color = "blue";
-                            mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                        } else {
-                            color = "red";
-                            mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
-                        }
-                    }).build(),
+                .setbFunction(() -> {
+                    if (color.equalsIgnoreCase("red")) {
+                        color = "blue";
+                        mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+                    } else {
+                        color = "red";
+                        mapper.getLedDriver().setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
+                    }
+                }).build(),
             builder.setGetter(() -> gamepad2.left_bumper)
-                    .setbFunction(() -> {
-                        if(mapper.getArm1().getPosition() < 0.5){
-                            mapper.getArm1().setPosition(1);
-                            mapper.getArm2().setPosition(1);
-                        } else {
-                            mapper.getArm1().setPosition(0);
-                            mapper.getArm2().setPosition(0);
-                        }
-                    }).build(),
+                .setbFunction(() -> {
+                    if(mapper.getArm1().getPosition() < 0.5){
+                        mapper.getArm1().setPosition(1);
+                        mapper.getArm2().setPosition(1);
+                    } else {
+                        mapper.getArm1().setPosition(0);
+                        mapper.getArm2().setPosition(0);
+                    }
+                }).build(),
             builder.setGetter(() -> gamepad2.x)
-                    .setbFunction(() -> {
-                        if(!liftOverride){
-                            liftOverride = true;
-                        } else {
-                            liftOverride = false;
-                        }
+                .setbFunction(() -> {
+                    if(!liftOverride){
+                        liftOverride = true;
+                    } else {
+                        liftOverride = false;
+                    }
                 }).build(),
             builder.setGetter(() -> gamepad2.b)
-                    .setbFunction(() -> {
-                        if(mapper.getCap().getPosition() < 0.5) {
-                            mapper.getCap().setPosition(1);
-                        }else mapper.getCap().setPosition(0);
-                    }).build(),
-
-            builder.setGetter(() -> !gamepad2.dpad_up)
-                .setbFunction(()-> {
-                    mapper.getLift().setPower(0);
+                .setbFunction(() -> {
+                    if(mapper.getCap().getPosition() < 0.5) {
+                        mapper.getCap().setPosition(1);
+                    }else mapper.getCap().setPosition(0);
                 }).build(),
-
+            builder.setGetter(() -> !gamepad2.dpad_up)
+                .setbFunction(()->
+                    mapper.getLift().setPower(0)
+                ).build(),
             builder.setGetter(() -> !gamepad2.dpad_down)
-                .setbFunction(()->{
-                mapper.getLift().setPower(0);
-            }).build()
-
-            ));
+                .setbFunction(()->
+                    mapper.getLift().setPower(0)
+                ).build(),
+            builder.setGetter(() -> gamepad2.a)
+                .setbFunction(() -> {
+                    lift.setTargetPosition(50);
+                    lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    lift.setPower(-1);
+                }).build(),
+            builder.setGetter(() -> gamepad2.y)
+                .setbFunction(() -> {
+                    lift.setTargetPosition(2000);
+                    lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    lift.setPower(1);
+                }).build(),
+            builder.setGetter(() -> !lift.isBusy())
+                .setbFunction(() -> {
+                    lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    lift.setPower(0);
+                }).build()
+        ));
         return buttons;
     }
-    /*
-     * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-     */
-    @Override
-    public void init_loop() {
 
+
+    @Override
+    protected void doWhileInitLoop(DeviceMap mapper) {
+        addData("Angle", Double.toString(driver.getAngle()));
+        updateTelemetry();
     }
 
-    /*
-     * Code to run ONCE when the driver hits PLAY
-     */
     @Override
-    public void start() {
-        runtime.reset();
-        DeviceMap mapper = DeviceMap.getInstance();
+    protected void play(DeviceMap mapper) {
         mapper.getRightAuto().setPosition(0.6);
         mapper.getRightFinger().setPosition(0.0);
         mapper.getClaw().setPosition(1);
         mapper.getArm1().setPosition(1);
         mapper.getArm2().setPosition(1);
-
     }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-     */
     @Override
-    public void loop() {
-        DeviceMap mapper = DeviceMap.getInstance();
+    protected void doWhile(DeviceMap mapper) {
+
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
         double right_stick_x = -gamepad1.right_stick_x;
         double multiplier = gamepad1.left_trigger + 1;
+
+        //driver.moveFieldCentric(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.right_stick_y);
         if(color.equalsIgnoreCase("red"))
             driver.moveTrigRed(x / multiplier, y / multiplier, right_stick_x / multiplier);
         else driver.moveTrigBlue(x / multiplier, y / multiplier, right_stick_x / multiplier);
@@ -253,34 +247,19 @@ public class DriveButtonOpMode extends DriveOpMode {
         } else if (gamepad2.dpad_down && liftOverride) {
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             lift.setPower(-1);
-        }else if (gamepad2.a){
-            lift.setTargetPosition(50);
-            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift.setPower(-1);
-        }else if (gamepad2.y) {
-            lift.setTargetPosition(2000);
-            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift.setPower(1);
-        }else if (!lift.isBusy()){
-            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            lift.setPower(0);
-        }
+        }else if((liftPos >= 7050 || liftPos <= 100) && !liftOverride) lift.setPower(0);
 
         addData("lift: ", liftPos);
         addData("Overrride: ", liftOverride);
         addData("Motor Status: ", lift.getMode());
         addData("trigger: ", gamepad2.left_trigger);
-
-        for(Button button : buttons) button.press();
-        updateTelemetry();
     }
 
-    /*
-     * Code to run ONCE after the driver hits STOP
-     */
     @Override
-    public void stop() {
+    protected void end(DeviceMap mapper) {
+
     }
+
 
     protected void addData(String header, Object value) {
         driver.addData(header, value);

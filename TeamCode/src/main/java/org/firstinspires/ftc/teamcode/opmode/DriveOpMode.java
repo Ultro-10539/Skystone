@@ -35,8 +35,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.drive.Button;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -54,15 +58,17 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDriver;
  */
 
 public abstract class DriveOpMode extends OpMode {
+    private DeviceMap mapper;
     protected MecanumDriver driver;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private List<Button> buttons = new ArrayList<>();
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-        DeviceMap mapper = DeviceMap.getInstance(hardwareMap);
+        mapper = DeviceMap.getInstance(hardwareMap);
         mapper.setCurrentOpMode(this);
         mapper.setTelemetry(telemetry);
 
@@ -71,9 +77,6 @@ public abstract class DriveOpMode extends OpMode {
         mapper.setUpImu(hardwareMap);
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
-        mapper.getLift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mapper.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -87,14 +90,23 @@ public abstract class DriveOpMode extends OpMode {
         driver.setTelemetry(telemetry);
         addData("Status", "Initialized");
         updateTelemetry();
-        mapper.setBulkMode(LynxModule.BulkCachingMode.AUTO);
+        mapper.setBulkMode(LynxModule.BulkCachingMode.OFF);
+        buttons = setUpButtons(new Button.Builder(), mapper);
+        afterInit(mapper);
     }
 
+    protected abstract void afterInit(DeviceMap mapper);
+    protected abstract List<Button> setUpButtons(Button.Builder builder, DeviceMap mapper);
+    protected abstract void doWhileInitLoop(DeviceMap mapper);
+    protected abstract void play(DeviceMap mapper);
+    protected abstract void doWhile(DeviceMap mapper);
+    protected abstract void end(DeviceMap mapper);
     /*
      * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
      */
     @Override
     public void init_loop() {
+        doWhileInitLoop(mapper);
     }
 
     /*
@@ -103,6 +115,8 @@ public abstract class DriveOpMode extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+        play(mapper);
+        for(Button button : buttons) button.press();
     }
 
     /*
@@ -110,114 +124,17 @@ public abstract class DriveOpMode extends OpMode {
      */
     @Override
     public void loop() {
-        DeviceMap map = DeviceMap.getInstance();
-        double x = gamepad1.left_stick_x;
-        double y = -gamepad1.left_stick_y;
-        double right_stick_x = -gamepad1.right_stick_x;
-        double multiplier = gamepad1.left_trigger + 1;
-        driver.move(x / multiplier, y / multiplier, right_stick_x / multiplier);
-
-        driver.intake(gamepad2.left_stick_y, gamepad2.right_stick_y);
-        driver.conveyer(-gamepad2.right_trigger);
-
-        Servo left = map.getLeftAuto();
-        if(gamepad1.b) {
-            left.setPosition(0.4);
-        }
-        if(gamepad1.y) {
-            left.setPosition(1);
-        }
-        telemetry.addData("leftPos: ", left.getPosition());
-
-        Servo right = map.getRightAuto();
-        if(gamepad1.a) {
-            right.setPosition(1);
-        }
-
-        if(gamepad1.x) {
-            right.setPosition(0);
-        }
-        telemetry.addData("rightPos: ", right.getPosition());
-
-        if(gamepad1.left_bumper){
-            map.getLeftFinger().setPosition(1);
-            map.getRightFinger().setPosition(1);
-        }
-        if(gamepad1.right_bumper){
-            map.getLeftFinger().setPosition(0);
-            map.getRightFinger().setPosition(0);
-        }
-
-
-        if (gamepad2.left_trigger > 0) {
-            map.getFoundationLeft().setPosition(1);
-        } else {
-            map.getFoundationLeft().setPosition(0);
-
-        }
-
-        if (gamepad2.right_bumper) {
-            map.getClaw().setPosition(1);
-        } else if (gamepad2.left_bumper) {
-            map.getClaw().setPosition(0);
-        }
-
-        if (gamepad2.a) {
-            map.getArm1().setPosition(1);
-            map.getArm2().setPosition(1);
-        } else if (gamepad2.y) {
-            map.getArm1().setPosition(0);
-            map.getArm2().setPosition(0);
-        }
-
-
-        //lift control
-
-        boolean liftOverride = false;
-        if (gamepad2.back) {
-            liftOverride = true;
-        } else if (gamepad2.start) {
-            liftOverride = false;
-        }
-
-
-        double liftPos = map.getLift().getCurrentPosition();
-
-        if (gamepad2.dpad_up && liftPos < 7050 && liftOverride == false) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftPos > 100 && liftOverride == false) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(-1);
-        } else if (gamepad2.dpad_up && liftOverride == true) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(1);
-        } else if (gamepad2.dpad_down && liftOverride == true) {
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(-1);
-        }else if (gamepad2.b){
-            map.getLift().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            map.getLift().setTargetPosition(50);
-            map.getLift().setPower(-1);
-        }else if (map.getLift().isBusy() != true){
-            map.getLift().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            map.getLift().setPower(0);
-        }
-
-        telemetry.addData("lift: ", map.getLift().getCurrentPosition());
-        telemetry.addData("Overrride: ", liftOverride);
-        telemetry.addData("Motor Status: ", map.getLift().getMode());
-        telemetry.addData("trigger: ", gamepad2.left_trigger);
-
-        telemetry.update();
+        mapper.clearBulkCache();
+        doWhile(mapper);
     }
+
 
     /*
      * Code to run ONCE after the driver hits STOP
      */
     @Override
     public void stop() {
-
+        end(mapper);
     }
 
     protected void addData(String header, Object value) {

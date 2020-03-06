@@ -7,6 +7,7 @@ import net.jafama.FastMath;
 
 import org.firstinspires.ftc.teamcode.drive.MathUtil;
 import org.firstinspires.ftc.teamcode.drive.Vector;
+import org.firstinspires.ftc.teamcode.threading.Threader;
 import org.junit.Test;
 import org.junit.runners.JUnit4;
 
@@ -18,10 +19,10 @@ public class WrapAngleTest {
     @Test
     public void testYea() {
         Logger log = Logger.getLogger("test");
+        Threader.registerThreads();
 
 
-        log.info(MathUtil.wrapAngle(181) + "<-- 181");
-        log.info(MathUtil.wrapAngle(-181) + "<-- -181");
+        Threader.registerThreads();
     }
 
 }

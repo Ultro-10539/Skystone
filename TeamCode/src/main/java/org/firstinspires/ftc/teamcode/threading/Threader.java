@@ -28,7 +28,13 @@ public final class Threader {
     }
 
     public static void destroy() {
-        //service.shutdown();
+        List<Runnable> runnables = service.shutdownNow();
+        for(Runnable runnable : runnables) {
+            if(!(runnable instanceof UltroThread)) continue;
+            if(threads.contains(runnable)) {
+                ((UltroThread) runnable).interrupt();
+            }
+        }
     }
 
     private static void registerRunnable(Class<? extends UltroThread> clasz) {

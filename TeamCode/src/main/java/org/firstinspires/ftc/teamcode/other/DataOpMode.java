@@ -28,6 +28,7 @@ public class DataOpMode extends AutoOpMode  {
         DeviceMap map = DeviceMap.getInstance();
 
         for(DcMotor sensor : map.getAllMotors()) {
+            map.clearBulkCache();
             telemetry.addData("motor", sensor.getCurrentPosition());
         }
         for(DistanceSensor sensor : map.getDistanceSensors()) {

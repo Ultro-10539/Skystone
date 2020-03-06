@@ -18,21 +18,29 @@ public abstract class UltroThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            go();
-        }catch (Exception e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
+        while(!Thread.currentThread().isInterrupted()) {
+            try {
+                go();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
     public abstract void go();
+
     public abstract void setUp(DeviceMap map);
 
     public TimeUnit getTimeUnit() {
         return TimeUnit.MILLISECONDS;
     }
+
     public long getTime() {
         return 5L;
+    }
+
+    void interrupt() {
+        Thread.currentThread().interrupt();
     }
 }

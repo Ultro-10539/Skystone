@@ -21,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcontroller.ultro.listener.UltroVuforia;
+import org.firstinspires.ftc.teamcode.drive.UltroMotor;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvInternalCamera;
@@ -67,6 +68,7 @@ public final class DeviceMap {
     private List<LynxModule> modules;
 
     public DeviceMap(final HardwareMap map) {
+        if(map == null) throw new RuntimeException("map cannot be null!");
         //for later
 
         INSTANCE = this;
@@ -86,10 +88,10 @@ public final class DeviceMap {
     }
 
     public void setUpDriveMotors(HardwareMap map) {
-        leftTop = map.get(DcMotorEx.class, "LeftTop");
-        leftBottom = map.get(DcMotorEx.class, "LeftBottom");
-        rightTop = map.get(DcMotorEx.class, "RightTop");
-        rightBottom = map.get(DcMotorEx.class, "RightBottom");
+        leftTop = new UltroMotor(map.get(DcMotorEx.class, "LeftTop"));
+        leftBottom = new UltroMotor(map.get(DcMotorEx.class, "LeftBottom"));
+        rightTop = new UltroMotor(map.get(DcMotorEx.class, "RightTop"));
+        rightBottom = new UltroMotor(map.get(DcMotorEx.class, "RightBottom"));
 
         this.driveMotors = new DcMotor[]{leftTop, rightTop, leftBottom, rightBottom};
 
@@ -100,7 +102,7 @@ public final class DeviceMap {
 
 
         for(DcMotor motor : this.driveMotors)
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     /**
      * This will just set up all the driveMotors
@@ -112,11 +114,11 @@ public final class DeviceMap {
             telemetry.update();
 
 
-            leftIntake = map.get(DcMotorEx.class, "leftIntake");
-            rightIntake = map.get(DcMotorEx.class, "rightIntake");
+            leftIntake = new UltroMotor(map.get(DcMotorEx.class, "leftIntake"));
+            rightIntake = new UltroMotor(map.get(DcMotorEx.class, "rightIntake"));
 
-            conveyer = map.get(DcMotorEx.class, "conveyor");
-            lift = map.get(DcMotorEx.class, "lift");
+            conveyer = new UltroMotor(map.get(DcMotorEx.class, "conveyor"));
+            lift = new UltroMotor(map.get(DcMotorEx.class, "lift"));
 
             this.intakeMotors = new DcMotor[] {
                      leftIntake, rightIntake, conveyer
@@ -410,7 +412,7 @@ public final class DeviceMap {
         return INSTANCE;
     }
     public static DeviceMap getInstance(HardwareMap map) {
-        if(INSTANCE == null && map != null) INSTANCE = new DeviceMap(map);
+        if(INSTANCE == null) INSTANCE = new DeviceMap(map);
         return INSTANCE;
     }
 
