@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.drive.Vector;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 
-@Autonomous(name = "🔴DoubleSampleFoundation")
-public class AutonomousRedSampleFoundation extends AutoPart1 {
+@Autonomous(name = "🔵DoubleSampleFoundation")
+public class BLUEHELP extends AutoPart1 {
     @Override
     public void run() {
         DeviceMap mapper = DeviceMap.getInstance();
@@ -95,32 +95,44 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
 
                 break;
         }
-        driver.move(Direction.FORWARD, 0.3, 5);
+        driver.move(Direction.FORWARD, 0.3, 7);
     }
 
     private void firstSample() {
+        driver.reset();
         //move forward 5 inches and turn facing towards foundation
-        driver.turn(0.7, 42);
+        driver.turn(0.7, -42);
+        driver.reset();
         //89.3125
         //drive until 120cm away from other wall
         //TODO: may need to adjust distance value
+        telemetry.addData("yes", "yes");
+        double defaultX = 32.5;
         switch(pos){
-            case LEFT_CORNER:
-                driver.move(Vector.from(-17, 0), 0.9, 0.5, 88.5125);
+            case RIGHT_CORNER:
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+
+                telemetry.addData("decision", pos);
                 break;
             case MIDDLE:
+                telemetry.addData("decision", pos);
                 //67
-                driver.move(Vector.from(-9, 0), 0.9, 0.5, 88.5125);
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
                 break;
-            case RIGHT_CORNER:
-                driver.move(Vector.from(-9, 0), 0.9, 0.5, 88.5125);
+            case LEFT_CORNER:
+                telemetry.addData("decision", pos);
+                driver.move(Vector.from(10, 0), 0.9, 0.5, -88.25);
+                defaultX = 15;
                 break;
             default:
-                driver.move(Vector.from(-9, 0), 0.9, 0.5, 88.5125);
+                telemetry.addData("decision", pos);
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
                 break;
         }
 
-        driver.move(Vector.from(-32.5, 0), 0.8, 0.7, 0);
+        telemetry.update();
+        driver.reset();
+        driver.move(Vector.from(defaultX, 0), 0.8, 0.7, 0);
         driver.stopAndReset();
 
         //face foundation
@@ -138,17 +150,17 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         map.getLeftFinger().setPosition(1.0);
         map.getRightFinger().setPosition(0.0);
         //push foundation into correct position
-        driver.move(Direction.FORWARD, 0.9, 9, true);
-        driver.turn(0.7, -74.5);
+        driver.move(Direction.FORWARD, 0.9, 10, true);
+        driver.turn(0.7, 73);
         map.getFoundationLeft().setPosition(0);
         map.getFoundationRight().setPosition(1);
-        driver.move(Direction.LEFT, 0.7, 3);
-        driver.move(Vector.from(67.5, 0), 0.9, 0.45, -87.2);
+        driver.move(Direction.RIGHT, 0.7, 2);
+        driver.move(Vector.from(-62.5, 0), 0.9, 0.45, 92.7);
     }
 
     protected void secondSample() {
         //faces stones
-        driver.turn(0.5, 84);
+        driver.turn(0.5, -84);
 
         //prepares stones
         switch(pos){
@@ -156,24 +168,26 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
                 //prepares left arm
                 map.getLeftAuto().setPosition(0.9);
                 map.getLeftFinger().setPosition(0.6);
-                driver.move(Direction.RIGHT, 0.7, 8);
-                //closes right arm
-                map.getRightAuto().setPosition(0.6);
-                map.getRightFinger().setPosition(0.0);
-                break;
-            case MIDDLE:
-                //prepares left arm
-                map.getLeftAuto().setPosition(0.9);
-                map.getLeftFinger().setPosition(0.6);
 
                 //closes right arm
                 map.getRightAuto().setPosition(0.6);
                 map.getRightFinger().setPosition(0.0);
                 break;
+            case MIDDLE:
+                //prepares right arm
+                map.getRightAuto().setPosition(0.3);
+                map.getRightFinger().setPosition(0.5);
+//                driver.move(Direction.LEFT, 0.7, 8);
+
+                //closes left arm
+                map.getLeftAuto().setPosition(0.6);
+                map.getLeftFinger().setPosition(1.0);
+                break;
             case RIGHT_CORNER:
                 //prepares right arm
                 map.getRightAuto().setPosition(0.3);
                 map.getRightFinger().setPosition(0.5);
+                driver.move(Direction.LEFT, 0.7, 8);
 
                 //closes left arm
                 map.getLeftAuto().setPosition(0.6);
@@ -190,13 +204,51 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
                 break;
         }
         //samples stones
-        sampleStone();
+        //Drive up to blocks
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
+
+        //pick up blocks
+        switch(pos){
+            case LEFT_CORNER:
+                //uses left arm
+                map.getLeftAuto().setPosition(1.0);
+                map.getLeftFinger().setPosition(1.0);
+                sleep(500);
+                map.getLeftAuto().setPosition(0.6);
+
+                break;
+            case MIDDLE:
+                //uses right arm
+                map.getRightAuto().setPosition(0.0);
+                map.getRightFinger().setPosition(0.0);
+                sleep(500);
+                map.getRightAuto().setPosition(0.6);
+
+                break;
+            case RIGHT_CORNER:
+                //uses right arm
+                map.getRightAuto().setPosition(0.0);
+                map.getRightFinger().setPosition(0.0);
+                sleep(500);
+                map.getRightAuto().setPosition(0.6);
+
+                break;
+            default:
+                //uses left arm
+                map.getLeftAuto().setPosition(1.0);
+                map.getLeftFinger().setPosition(1.0);
+                sleep(500);
+                map.getLeftAuto().setPosition(0.6);
+
+                break;
+        }
+        driver.move(Direction.FORWARD, 0.3, 6);
     }
 
     protected void foundation(){
         //Drives toward foundation
-        driver.turn(0.7, -76);
-        driver.move(Vector.from(-59, 0), 0.9, 0.45, -86.75);
+        driver.turn(0.7, 76);
+        driver.move(Vector.from(59, 0), 0.9, 0.45, 91.8);
         driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
         //grab foundation and drop stone
         map.getLeftFinger().setPosition(0.6);
@@ -206,7 +258,6 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         map.getRightFinger().setPosition(0.0);
         //push foundation into correct position and park
         driver.move(Direction.BACKWARD, 0.9, 10, true);
-        driver.move(Direction.RIGHT, 0.9, 2);
         driver.move(Direction.FORWARD, 0.9, 45, true);
     }
 
@@ -219,4 +270,5 @@ public class AutonomousRedSampleFoundation extends AutoPart1 {
         }
         driver.stop();
     }
+
 }

@@ -5,78 +5,60 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.Direction;
+import org.firstinspires.ftc.teamcode.drive.Vector;
+import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 
-@Autonomous(name = "AutonomousBlueSampleFoundation NOTIMER")
+@Autonomous(name = "🔵DoubleSampleFoundation")
 public class AutonomousBlueSampleFoundation extends AutoPart1 {
     @Override
     public void run() {
+        DeviceMap mapper = DeviceMap.getInstance();
+        mapper.getArm1().setPosition(1);
+        mapper.getArm2().setPosition(1);
         forwardRed();
         sampleStone();
         firstSample();
         secondSample();
-
-//        foundation();
+        foundation();
     }
+
 
     protected void forwardRed() {
 
         driver.stopAndReset();
         map.getClaw().setPosition(1);
-
-
-        //Drives forwards a bit
-        driver.move(Direction.BACKWARD, 0.7, 21, true);
-        driver.stop();
-    }
-
-    protected void sampleStone() {
-        //Prepares servos and lines up with correct block
-        //Prepares servo arms based on detected block
         switch(pos){
             case LEFT_CORNER:
                 //prepares left arm
-                map.getLeftAuto().setPosition(1.0);
-                map.getLeftFinger().setPosition(0.6);
-                driver.move(Direction.LEFT, 0.7, 8);
+                driver.prepareLeft();
+                driver.move(Direction.RIGHT, 0.7, 8);
                 //closes right arm
-                map.getRightAuto().setPosition(0.6);
-                map.getRightFinger().setPosition(0.0);
-                break;
-            case MIDDLE:
-                //prepares left arm
-                map.getLeftAuto().setPosition(1.0);
-                map.getLeftFinger().setPosition(0.6);
-
-                //closes right arm
-                map.getRightAuto().setPosition(0.6);
-                map.getRightFinger().setPosition(0.0);
+                driver.closeRight();
                 break;
             case RIGHT_CORNER:
                 //prepares right arm
-                map.getRightAuto().setPosition(0.3);
-                map.getRightFinger().setPosition(0.5);
+                driver.prepareRight();
 
                 //closes left arm
-                map.getLeftAuto().setPosition(0.6);
-                map.getLeftFinger().setPosition(1.0);
-
+                driver.closeLeft();
+                break;
+            case MIDDLE:
             default:
                 //prepares left arm
-                map.getLeftAuto().setPosition(1.0);
-                map.getLeftFinger().setPosition(0.6);
+                driver.prepareLeft();
 
                 //closes right arm
-                map.getRightAuto().setPosition(0.6);
-                map.getRightFinger().setPosition(0.0);
+                driver.closeRight();
                 break;
         }
 
+        //Drives forwards a bit
+        driver.move(Direction.BACKWARD, 0.7, 21, true);
+    }
+
+    protected void sampleStone() {
         //Drive up to blocks
-        driver.moveCond(Direction.BACKWARD, 0.4, !(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20), true);
-//        while(!(colorLeft.getDistance(DistanceUnit.CM) <= 20 || colorRight.getDistance(DistanceUnit.CM) <= 20)){
-//            driver.move(Direction.BACKWARD, 0.4);
-//        }
-//        driver.move(Direction.BACKWARD, 0);
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
 
         //pick up blocks
         switch(pos){
@@ -113,81 +95,163 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
 
                 break;
         }
-        //move forward 5 inches and turn facing towards foundation
-        driver.move(Direction.FORWARD, 0.3, 5);
-        driver.turn(0.5, 83);
-
-        //brings right Auto down because stone might block distance sensor
-        map.getRightAuto().setPosition(0.3);
+        driver.move(Direction.FORWARD, 0.3, 7);
     }
 
     private void firstSample() {
+        //move forward 5 inches and turn facing towards foundation
+        driver.turn(0.7, -42);
+        //89.3125
         //drive until 120cm away from other wall
         //TODO: may need to adjust distance value
-        driver.moveCond(Direction.BACKWARD, 0.9, back.getDistance(DistanceUnit.CM) >= 120, true);
+        telemetry.addData("yes", "yes");
+        switch(pos){
+            case RIGHT_CORNER:
+                System.out.println("test" + pos);
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+                break;
+            case MIDDLE:
+                System.out.println("test" + pos);
+                //67
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+                break;
+            case LEFT_CORNER:
+                System.out.println("test" + pos);
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+                break;
+            default:
+                System.out.println("test" + pos);
+                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+                break;
+        }
 
-        //brings right Auto back up
-        map.getRightAuto().setPosition(0.6);
+        driver.move(Vector.from(32.5, 0), 0.8, 0.7, 0);
+        driver.stopAndReset();
 
         //face foundation
-        driver.turn(0.5, -83);
+        //driver.turn(0.5, -83);
 
         //line up with foundation
-        driver.moveCond(Direction.BACKWARD, 0.4, !(colorLeft.getDistance(DistanceUnit.CM) <= 13 || colorRight.getDistance(DistanceUnit.CM) <= 13), true);
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 && data.getColorRightDistance() <= 15), true);
 
-        //drop stone
-        map.getLeftFinger().setPosition(0.6);
-        map.getRightFinger().setPosition(0.5);
-        sleep(500);
-        map.getLeftFinger().setPosition(1.0);
-        map.getRightFinger().setPosition(0.0);
-
-        //drive forward, turn 180, then grab foundation
-        driver.move(Direction.FORWARD, 0.5, 5, true);
-        driver.turn(0.5, -166);
-        driver.move(Direction.FORWARD, 0.5, 5, true);
+        //grab foundation and drop stone
         map.getFoundationLeft().setPosition(1);
         map.getFoundationRight().setPosition(0);
-
-        //drive toward wall a bit then turn
-        //TODO: may need to adjust distance values.
-        driver.moveCond(Direction.BACKWARD, 0.7, back.getDistance(DistanceUnit.CM) >= 120, true);
-        driver.turn(0.7, 83);
+        map.getLeftFinger().setPosition(0.6);
+        map.getRightFinger().setPosition(0.5);
+        sleep(1000);
+        map.getLeftFinger().setPosition(1.0);
+        map.getRightFinger().setPosition(0.0);
+        //push foundation into correct position
+        driver.move(Direction.FORWARD, 0.9, 10, true);
+        driver.turn(0.7, 73);
         map.getFoundationLeft().setPosition(0);
         map.getFoundationRight().setPosition(1);
-        //TODO: strafe left or right depending on distance sensor value
+        driver.move(Direction.RIGHT, 0.7, 2);
+        driver.move(Vector.from(-77.5, 0), 0.9, 0.45, 92.7);
     }
 
     protected void secondSample() {
-        //drive forward to next sample
-        //TODO: change distance value so that robot is properly aligned to pick up left/middle
-        driver.moveCond(Direction.BACKWARD, 0.8, back.getDistance(DistanceUnit.CM) >= 120, true);
-        driver.turn(0.7, 83);
+        //faces stones
+        driver.turn(0.5, -84);
 
-        //Line up with correct block
-        //Directions are switched because robot is oriented differently on blue than on red
-        sampleStone();
-        map.getRightAuto().setPosition(0.6);
+        //prepares stones
+        switch(pos){
+            case LEFT_CORNER:
+                //prepares left arm
+                map.getLeftAuto().setPosition(0.9);
+                map.getLeftFinger().setPosition(0.6);
+
+                //closes right arm
+                map.getRightAuto().setPosition(0.6);
+                map.getRightFinger().setPosition(0.0);
+                break;
+            case MIDDLE:
+                //prepares right arm
+                map.getRightAuto().setPosition(0.3);
+                map.getRightFinger().setPosition(0.5);
+//                driver.move(Direction.LEFT, 0.7, 8);
+
+                //closes left arm
+                map.getLeftAuto().setPosition(0.6);
+                map.getLeftFinger().setPosition(1.0);
+                break;
+            case RIGHT_CORNER:
+                //prepares right arm
+                map.getRightAuto().setPosition(0.3);
+                map.getRightFinger().setPosition(0.5);
+                driver.move(Direction.LEFT, 0.7, 8);
+
+                //closes left arm
+                map.getLeftAuto().setPosition(0.6);
+                map.getLeftFinger().setPosition(1.0);
+                break;
+            default:
+                //prepares left arm
+                map.getLeftAuto().setPosition(0.9);
+                map.getLeftFinger().setPosition(0.6);
+
+                //closes right arm
+                map.getRightAuto().setPosition(0.6);
+                map.getRightFinger().setPosition(0.0);
+                break;
+        }
+        //samples stones
+        //Drive up to blocks
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
+
+        //pick up blocks
+        switch(pos){
+            case LEFT_CORNER:
+                //uses left arm
+                map.getLeftAuto().setPosition(1.0);
+                map.getLeftFinger().setPosition(1.0);
+                sleep(500);
+                map.getLeftAuto().setPosition(0.6);
+
+                break;
+            case MIDDLE:
+                //uses right arm
+                map.getRightAuto().setPosition(0.0);
+                map.getRightFinger().setPosition(0.0);
+                sleep(500);
+                map.getRightAuto().setPosition(0.6);
+
+                break;
+            case RIGHT_CORNER:
+                //uses right arm
+                map.getRightAuto().setPosition(0.0);
+                map.getRightFinger().setPosition(0.0);
+                sleep(500);
+                map.getRightAuto().setPosition(0.6);
+
+                break;
+            default:
+                //uses left arm
+                map.getLeftAuto().setPosition(1.0);
+                map.getLeftFinger().setPosition(1.0);
+                sleep(500);
+                map.getLeftAuto().setPosition(0.6);
+
+                break;
+        }
+        driver.move(Direction.FORWARD, 0.3, 6);
     }
 
     protected void foundation(){
-        //drives until lined up with foundation
-        driver.moveCond(Direction.BACKWARD, 0.4, !(colorLeft.getDistance(DistanceUnit.CM) <= 13 || colorRight.getDistance(DistanceUnit.CM) <= 13), true);
-
-        //drop stone
+        //Drives toward foundation
+        driver.turn(0.7, 76);
+        driver.move(Vector.from(59, 0), 0.9, 0.45, 91.8);
+        driver.moveUntil(Direction.BACKWARD, 0.3, data -> (data.getColorLeftDistance() <= 15 || data.getColorRightDistance() <= 15), true);
+        //grab foundation and drop stone
         map.getLeftFinger().setPosition(0.6);
         map.getRightFinger().setPosition(0.5);
-        sleep(500);
+        sleep(1000);
         map.getLeftFinger().setPosition(1.0);
         map.getRightFinger().setPosition(0.0);
-
-        //push foundation into correct position
-        driver.move(Direction.BACKWARD, 0.7, 10, true);
-
-        //park
-        driver.move(Direction.FORWARD, 0.7, 30, true);
-        map.getRightFinger().setPosition(0.5);
-        map.getRightAuto().setPosition(0);
+        //push foundation into correct position and park
+        driver.move(Direction.BACKWARD, 0.9, 10, true);
+        driver.move(Direction.FORWARD, 0.9, 45, true);
     }
 
     private void correctLocation() {
