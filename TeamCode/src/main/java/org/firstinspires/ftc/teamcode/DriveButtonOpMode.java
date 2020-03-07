@@ -194,8 +194,6 @@ public class DriveButtonOpMode extends DriveOpMode {
 
     @Override
     protected void doWhileInitLoop(DeviceMap mapper) {
-        addData("Angle", Double.toString(driver.getAngle()));
-        updateTelemetry();
     }
 
     @Override
@@ -253,6 +251,7 @@ public class DriveButtonOpMode extends DriveOpMode {
         addData("Overrride: ", liftOverride);
         addData("Motor Status: ", lift.getMode());
         addData("trigger: ", gamepad2.left_trigger);
+        updateTelemetry();
     }
 
     @Override

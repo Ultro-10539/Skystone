@@ -99,7 +99,6 @@ import java.util.Locale;
  * @see <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf">BNO055 specification</a>
  */
 @TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
-@Disabled                            // Uncomment this to add to the opmode list
 public class SensorBNO055IMUCalibration extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -131,8 +130,14 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
 
         // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
+
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.gyroPowerMode       = BNO055IMU.GyroPowerMode.FAST;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.gyroBandwidth       = BNO055IMU.GyroBandwidth.HZ523;
+        parameters.loggingEnabled      = false;
+
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
@@ -164,6 +169,10 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
                 ReadWriteFile.writeFile(file, calibrationData.serialize());
                 telemetry.log().add("saved to '%s'", filename);
 
+
+                File file1 = AppUtil.getInstance().getSettingsFile(filename);
+                BNO055IMU.CalibrationData data = BNO055IMU.CalibrationData.deserialize(ReadWriteFile.readFile(file1));
+                if(areEqual(data, calibrationData)) telemetry.addLine("yep they are the same!");
                 // Wait for the button to be released
                 while (gamepad1.a) {
                     telemetry.update();
@@ -173,6 +182,20 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
 
             telemetry.update();
         }
+    }
+
+    private boolean areEqual(BNO055IMU.CalibrationData data1, BNO055IMU.CalibrationData data2) {
+        return data1.dxAccel == data2.dxAccel &&
+                data1.dyAccel == data2.dyAccel &&
+                data1.dzAccel == data2.dzAccel &&
+                data1.radiusAccel == data2.radiusAccel &&
+                data1.radiusMag == data2.radiusMag &&
+                data1.dxGyro == data2.dxGyro &&
+                data1.dyGyro == data2.dyGyro &&
+                data1.dzGyro == data2.dzGyro &&
+                data1.dxMag == data2.dxMag &&
+                data1.dyMag == data2.dyMag &&
+                data1.dzMag == data2.dzMag;
     }
 
     void composeTelemetry() {

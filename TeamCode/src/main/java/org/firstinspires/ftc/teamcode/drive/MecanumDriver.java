@@ -132,7 +132,7 @@ public final class MecanumDriver implements IDriver {
                 angle = imu.getAngle();
             }
         }
-        stop();
+        stopAndReset();
     }
     /**
      * Drive until a conditional is true
@@ -164,6 +164,10 @@ public final class MecanumDriver implements IDriver {
 
     public void stopAndReset(){
         stop();
+        reset();
+    }
+
+    public void reset() {
         for (DcMotor motor : motors) {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -236,7 +240,7 @@ public final class MecanumDriver implements IDriver {
                     distanceToTarget * FastMath.cos(relativeAngleRadians),
                     distanceToTarget * FastMath.sin(relativeAngleRadians));
 
-            //System.out.println("Relative Vector: " + relativeVector);
+            System.out.println("Relative Vector: " + relativeVector);
             Vector normalized = relativeVector.normalize();
 
             double movementX = normalized.getX();
@@ -388,6 +392,8 @@ public final class MecanumDriver implements IDriver {
             UltroImu imu = Threader.get(UltroImu.class);
             angle = imu.getAngle();
         }
+
+        stopAndReset();
 
     }
 
@@ -593,6 +599,8 @@ public final class MecanumDriver implements IDriver {
 
     public boolean motorsBusy(int leftTopTarget, int rightTopTarget, int leftBottomTarget, int rightBottomTarget) {
         int[] current = getMotorCounts();
+        telemetry.addLine(Arrays.toString(current));
+        telemetry.update();
         int[] target = new int[] { leftTopTarget, rightTopTarget, leftBottomTarget, rightBottomTarget };
         for(int i = 0; i < current.length; i++) {
             //1: current, target: 3 => current < target
@@ -802,56 +810,21 @@ public final class MecanumDriver implements IDriver {
     }
 
     public void prepareRight() {
-        final double
-            openAuto = 0.6,
-            openFinger = 0.5,
-            preparedFinger = 0.5,
-            preparedAuto = 0.3,
-            closeAuto = 0,
-            closeFinger = 0;
-        map.getRightAuto().setPosition(preparedFinger);
-        map.getRightFinger().setPosition(preparedFinger);
-    }
-
-    public void openRightArm() {
-        map.getRightAuto().setPosition(0.6);
-    }
-    public void openRightFinger() {
+        map.getRightAuto().setPosition(0.3);
         map.getRightFinger().setPosition(0.5);
     }
-
-    public void closeRightArm() {
-        map.getRightAuto().setPosition(0);
-    }
-    public void closeRightFinger() {
-        map.getRightFinger().setPosition(0);
+    public void closeRight() {
+        map.getRightAuto().setPosition(0.6);
+        map.getRightFinger().setPosition(0.0);
     }
 
     public void prepareLeft() {
-        final double openAuto = 0.2,
-        openFinger = 1,
-        preparedFinger = 0.6,
-        preparedAuto = 0.7,
-        closeAuto = 1,
-        closeFinger = 0.6;
-
-        map.getLeftFinger().setPosition(preparedFinger);
-        map.getLeftAuto().setPosition(preparedAuto);
-    }
-
-
-    public void openLeftArm() {
-        map.getLeftAuto().setPosition(0.6);
-    }
-    public void openLeftFinger() {
+        map.getLeftAuto().setPosition(0.9);
         map.getLeftFinger().setPosition(0.6);
     }
-
-    public void closeLeftArm() {
-        map.getLeftAuto().setPosition(1);
-    }
-    public void closeLeftFinger() {
-        map.getLeftFinger().setPosition(1);
+    public void closeLeft() {
+        map.getLeftAuto().setPosition(0.6);
+        map.getLeftFinger().setPosition(1.0);
     }
 
     @Override
@@ -898,5 +871,6 @@ public final class MecanumDriver implements IDriver {
     private void clearBulkCache() {
         if(test) return;
         map.clearBulkCache();
+
     }
 }

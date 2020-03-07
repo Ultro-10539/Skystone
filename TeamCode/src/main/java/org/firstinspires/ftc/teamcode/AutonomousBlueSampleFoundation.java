@@ -108,7 +108,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         switch(pos){
             case RIGHT_CORNER:
                 System.out.println("test" + pos);
-                driver.move(Vector.from(15, 0), 0.9, 0.5, -88.25);
+                driver.move(Vector.from(16, 0), 0.9, 0.5, -88.25);
                 break;
             case MIDDLE:
                 System.out.println("test" + pos);
@@ -180,7 +180,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
                 //prepares right arm
                 map.getRightAuto().setPosition(0.3);
                 map.getRightFinger().setPosition(0.5);
-                driver.move(Direction.LEFT, 0.7, 8);
+                driver.move(Direction.LEFT, 0.7, 9);
 
                 //closes left arm
                 map.getLeftAuto().setPosition(0.6);
@@ -251,6 +251,7 @@ public class AutonomousBlueSampleFoundation extends AutoPart1 {
         map.getRightFinger().setPosition(0.0);
         //push foundation into correct position and park
         driver.move(Direction.BACKWARD, 0.9, 10, true);
+        driver.move(Direction.RIGHT, 0.9, 2);
         driver.move(Direction.FORWARD, 0.9, 45, true);
     }
 

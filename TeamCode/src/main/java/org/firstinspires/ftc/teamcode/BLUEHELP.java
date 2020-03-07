@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.drive.Direction;
 import org.firstinspires.ftc.teamcode.drive.Vector;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 
-@Autonomous(name = "🔵DoubleSampleFoundation")
+@Autonomous(name = "🔵bluehelp")
 public class BLUEHELP extends AutoPart1 {
     @Override
     public void run() {

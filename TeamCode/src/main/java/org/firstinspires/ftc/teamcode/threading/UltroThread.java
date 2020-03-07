@@ -10,15 +10,17 @@ import java.util.concurrent.TimeUnit;
  * PRE REQUISITES: DEFAULT CONSTRUCTOR ONLY
  */
 public abstract class UltroThread implements Runnable {
-
+    private boolean enabled;
     public UltroThread() {
+        this.enabled = true;
+
         DeviceMap deviceMap = DeviceMap.getInstance();
         setUp(deviceMap);
     }
 
     @Override
     public void run() {
-        while(!Thread.currentThread().isInterrupted()) {
+        while(enabled && !Thread.currentThread().isInterrupted()) {
             try {
                 go();
             } catch (Exception e) {
@@ -41,6 +43,10 @@ public abstract class UltroThread implements Runnable {
     }
 
     void interrupt() {
-        Thread.currentThread().interrupt();
+        enabled = false;
+    }
+
+    public void reset() {
+
     }
 }

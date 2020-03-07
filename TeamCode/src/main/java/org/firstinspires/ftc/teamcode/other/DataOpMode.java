@@ -17,6 +17,8 @@ import java.util.Locale;
 public class DataOpMode extends AutoOpMode  {
     @Override
     public void setup(DeviceMap mapper) {
+        mapper.initLynx(hardwareMap);
+        mapper.setUpDriveMotors(hardwareMap);
         mapper.setUpMotors(hardwareMap);
         mapper.setupServos(hardwareMap);
         mapper.setupSensors(hardwareMap);
@@ -26,9 +28,8 @@ public class DataOpMode extends AutoOpMode  {
     @Override
     public void beforeLoop() {
         DeviceMap map = DeviceMap.getInstance();
-
+        map.clearBulkCache();
         for(DcMotor sensor : map.getAllMotors()) {
-            map.clearBulkCache();
             telemetry.addData("motor", sensor.getCurrentPosition());
         }
         for(DistanceSensor sensor : map.getDistanceSensors()) {

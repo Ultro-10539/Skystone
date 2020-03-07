@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.drive.Button;
 import org.firstinspires.ftc.teamcode.monitor.DeviceMap;
 import org.firstinspires.ftc.teamcode.threading.Threader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp(name="Cartesian Driver op mode", group="Iterative Opmode")
@@ -18,7 +19,7 @@ public class TestDrive extends DriveOpMode {
 
     @Override
     protected List<Button> setUpButtons(Button.Builder builder, DeviceMap mapper) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -33,7 +34,7 @@ public class TestDrive extends DriveOpMode {
 
     @Override
     protected void doWhile(DeviceMap mapper) {
-        driver.moveFieldCentric(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.right_stick_y);
+        driver.moveFieldCentric(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x, gamepad1.right_stick_y);
     }
 
     @Override

@@ -14,15 +14,15 @@ public class testingOpmode extends AutoPart1 {
 
     @Override
     public void run() {
+
         testMethod();
     }
 
     private void testMethod() {
 
         driver.stopAndReset();
-        //uses left arm
-        driver.turn(0.7, -76);
-        driver.move(Vector.from(-75, 0), 0.7, 0.77, -87.8);
+        driver.move(Vector.from(4, 0), 0.9, 0.5, -88.25);
+        driver.move(Vector.from(32.5, 0), 0.8, 0.7, 0);
 
         //90 - -87.8
         //180 - -178

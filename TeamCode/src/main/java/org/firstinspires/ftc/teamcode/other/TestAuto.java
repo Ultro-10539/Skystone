@@ -12,13 +12,6 @@ import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 
 @Autonomous(name="Test Autonomous", group="Linear Opmode")
 public class TestAuto extends AutoOpMode {
-    @Override
-    public void preInit() {
-        super.preInit();
-        //if you're pro, do this
-        //driver.setTest(false);
-        //MonitorManager.startAll(DeviceMap.getInstance());
-    }
 
     @Override
     public void setup(DeviceMap map) {

@@ -99,10 +99,11 @@ public abstract class AutoOpMode extends LinearOpMode implements IActive {
     public void runOpMode() {
         preInit();
 
-        driver.stopAndReset();
         // Wait for the game to start (driver presses PLAY)
-        while(!isStarted())
+        while(!isStarted()) {
             beforeLoop();
+            idle();
+        }
 
         waitForStart();
         runtime.reset();

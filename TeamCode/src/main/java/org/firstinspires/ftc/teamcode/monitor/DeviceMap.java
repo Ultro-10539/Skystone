@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ReadWriteFile;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcontroller.ultro.listener.UltroVuforia;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.drive.UltroMotor;
 import org.firstinspires.ftc.teamcode.opmode.AutoOpMode;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -29,6 +31,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
+import java.io.File;
 import java.util.List;
 
 public final class DeviceMap {
@@ -194,12 +197,18 @@ public final class DeviceMap {
             telemetry.update();
             imu = map.get(BNO055IMU.class, "imu");
 
+
+            File file1 = AppUtil.getInstance().getSettingsFile("AdafruitIMUCalibration.json");
+            BNO055IMU.CalibrationData data = BNO055IMU.CalibrationData.deserialize(ReadWriteFile.readFile(file1));
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
             parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+            parameters.gyroPowerMode       = BNO055IMU.GyroPowerMode.FAST;
             parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-            parameters.loggingEnabled      = true;
-            parameters.loggingTag          = "IMU";
+            parameters.mode                = BNO055IMU.SensorMode.IMU;
+            parameters.gyroBandwidth       = BNO055IMU.GyroBandwidth.HZ523;
+            parameters.loggingEnabled      = false;
+            parameters.calibrationData = data;
 
             imu.initialize(parameters);
 
@@ -209,11 +218,8 @@ public final class DeviceMap {
                 linear = (LinearOpMode) getCurrentOpMode();
             }
 
-            while ((linear != null && linear.opModeIsActive()) && !imu.isGyroCalibrated()) {
-                telemetry.addData("calibrated", imu.isGyroCalibrated());
-                telemetry.update();
-            }
-            telemetry.addData("calibrated", imu.isGyroCalibrated());
+            telemetry.addData("imu done!", imu.isGyroCalibrated());
+            telemetry.update();
 
         //}, service);
     }

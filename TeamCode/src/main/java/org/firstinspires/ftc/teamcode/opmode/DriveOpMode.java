@@ -72,6 +72,7 @@ public abstract class DriveOpMode extends OpMode {
         mapper.setCurrentOpMode(this);
         mapper.setTelemetry(telemetry);
 
+        mapper.setUpLEDs(hardwareMap);
         mapper.setUpDriveMotors(hardwareMap);
         mapper.initLynx(hardwareMap);
         mapper.setUpImu(hardwareMap);
@@ -90,8 +91,9 @@ public abstract class DriveOpMode extends OpMode {
         driver.setTelemetry(telemetry);
         addData("Status", "Initialized");
         updateTelemetry();
-        mapper.setBulkMode(LynxModule.BulkCachingMode.OFF);
+        mapper.setBulkMode(LynxModule.BulkCachingMode.MANUAL);
         buttons = setUpButtons(new Button.Builder(), mapper);
+        if(buttons == null) buttons = new ArrayList<>();
         afterInit(mapper);
     }
 
@@ -116,7 +118,6 @@ public abstract class DriveOpMode extends OpMode {
     public void start() {
         runtime.reset();
         play(mapper);
-        for(Button button : buttons) button.press();
     }
 
     /*
@@ -126,6 +127,7 @@ public abstract class DriveOpMode extends OpMode {
     public void loop() {
         mapper.clearBulkCache();
         doWhile(mapper);
+        for(Button button : buttons) button.press();
     }
 
 

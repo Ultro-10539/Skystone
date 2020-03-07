@@ -6,45 +6,60 @@ import org.firstinspires.ftc.teamcode.threading.control.UltroImu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public final class Threader {
     private static List<UltroThread> threads;
-    private static ScheduledExecutorService service;
+    private static ExecutorService service;
 
     public static void registerThreads() {
         if(threads == null) threads = new ArrayList<>();
-        if(service == null) service = Executors.newScheduledThreadPool(10);
+        if(service == null) service = Executors.newFixedThreadPool(4);
+
+        for(UltroThread thread : threads) {
+            thread.interrupt();
+        }
+        threads.clear();
     }
 
     public static void registerAuto() {
         registerThreads();
         registerRunnable(UltroImu.class);
+        runThreads();
     }
     public static void registerDrive() {
         registerThreads();
         registerRunnable(UltroImu.class);
+        runThreads();
     }
 
+    private static void runThreads() {
+        for(UltroThread thread : threads)
+            service.submit(thread);
+    }
     public static void destroy() {
+        if(service == null) return;
+
+        for(UltroThread runnable  : threads)
+            runnable.interrupt();
+
         List<Runnable> runnables = service.shutdownNow();
-        for(Runnable runnable : runnables) {
-            if(!(runnable instanceof UltroThread)) continue;
-            if(threads.contains(runnable)) {
-                ((UltroThread) runnable).interrupt();
-            }
-        }
+        System.out.println(runnables.size());
+        service = null;
+
     }
 
     private static void registerRunnable(Class<? extends UltroThread> clasz) {
 
         try {
             UltroThread thread = clasz.newInstance();
-            if(contains(clasz)) return;
+            if(contains(clasz)) {
+                thread.reset();
+                return;
+            }
             DeviceMap.getInstance().getTelemetry().addData("Added thread: ", clasz.getName());
             threads.add(thread);
-            service.scheduleAtFixedRate(thread, 0, thread.getTime(), thread.getTimeUnit());
         }catch (IllegalAccessException|InstantiationException e) {
             e.printStackTrace();
         }
